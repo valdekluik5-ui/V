@@ -42,6 +42,10 @@ button{cursor:pointer}
 [data-look=dragon] .rec i{background:radial-gradient(circle at 40% 35%,var(--gold),var(--rose) 60%,#7a1606)}
 [data-look=dragon] .rec.on{animation:ring 1.6s ease-in-out infinite}
 @keyframes ring{50%{box-shadow:0 0 30px var(--rose),0 0 60px color-mix(in srgb,var(--rose) 40%,transparent)}}
+/* after recording: the take screen shows the dragon behind it instead of the camera */
+[data-look=dragon] #shoot.studio{background:transparent}
+[data-look=dragon] #shoot.studio>:not(.studio){visibility:hidden}
+[data-look=dragon] .studio{background:rgba(5,3,4,.35)}
 #dcount{position:absolute;inset:0;width:100%;height:100%;z-index:5;display:block;pointer-events:none;background:#000;transition:opacity 1.4s ease-in}
 #dcount.fade{opacity:0}
 [data-look=dragon] .count{top:auto;height:40%;bottom:6%;color:var(--gold);text-shadow:0 0 30px var(--rose),0 4px 20px #000}
@@ -226,7 +230,7 @@ textarea#text::placeholder{color:var(--mist);font-style:italic}
       <circle class="tw" cx="190" cy="196" r="1.1" fill="#ffd9e8"/><circle class="tw d2" cx="28" cy="210" r="1" fill="#f0c97a"/><circle class="tw d3" cx="368" cy="30" r="1.2" fill="#ffd9e8"/>
     </svg>
     <div class="hello">
-      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v20</span><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
+      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v21</span><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
       <h1 id="greet"></h1>
       <div class="season" id="season"></div>
       <p data-t="ask"></p>
@@ -1357,14 +1361,15 @@ function fireFx(canvas,where,opt){
   const cd=livingDragon($('#dcount'),{maxDpr:1.5,fps:60,dim:0,blinkMin:3,blinkVar:6,wakeSecs:2.2});
   const LOOKS={suffler:'lookSuffler',lava:'lookLava',frost:'lookFrost',bronze:'lookBronze'};
   const COLS={own:'cOwn',cycle:'cCycle',fire:'cFire',crimson:'cCrimson',gold:'cGold',jade:'cJade',frost:'cFrost',violet:'cViolet',steel:'cSteel'};
-  const rgb=a=>`rgb(${a.join(',')})`; let scr='home', tick=0;
+  const rgb=a=>`rgb(${a.join(',')})`; let scr='home', tick=0, studio=false;
   const dragonOn=()=>!!LIVE_PICS[S2.look];
   function paint(){ const p=firePalette('bg'), r=document.documentElement.style; r.setProperty('--acc',rgb(p.mid)); r.setProperty('--hot',rgb(p.hot)); }
   function apply(){
     const on=dragonOn(); document.documentElement.dataset.look=on?'dragon':'suffler';
     if(on){ S.dragon.pic=S2.look; S.dragon.colour=S2.dcol||'own'; paint(); clearInterval(tick); tick=setInterval(paint,150); }
     else { clearInterval(tick); document.documentElement.style.removeProperty('--acc'); document.documentElement.style.removeProperty('--hot'); }
-    const behind=on&&scr!=='shoot';
+    const behind=on&&(scr!=='shoot'||studio);
+    $('#shoot').classList.toggle('studio',studio);
     if(behind&&bg.start(S2.look,'bg')) fire.start(); else { bg.stop(); fire.stop(); }
   }
   function renderPanel(){
@@ -1377,6 +1382,8 @@ function fireFx(canvas,where,opt){
   $('#looksDone').onclick=()=>{ $('#looks').hidden=true; };
   $('#looks').addEventListener('click',e=>{ const b=e.target.closest('[data-lk],[data-dcol]'); if(!b) return;
     if(b.dataset.lk) S2.look=b.dataset.lk; else S2.dcol=b.dataset.dcol; save(); apply(); renderPanel(); });
+  // the take screen (after stop) opens and closes inside the camera screen
+  new MutationObserver(()=>{ const open=!$('#result').hidden; if(open!==studio){ studio=open; apply(); } }).observe($('#result'),{attributes:true,attributeFilter:['hidden']});
   apply();
   return {
     screen(id){ scr=id; if(id==='shoot') $('#looks').hidden=true; apply(); },
