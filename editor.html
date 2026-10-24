@@ -131,7 +131,7 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
 
 <div class="modal" id="exportModal" hidden><div class="box">
   <h2 data-t="saveT"></h2>
-  <div class="btns" id="resBtns"><button data-res="720" class="on">720p</button><button data-res="1080">1080p</button></div>
+  <div class="btns" id="resBtns"><button data-res="720">720p</button><button data-res="1080" class="on">1080p</button></div>
   <p class="hint" id="exportHint" data-t="saveHint"></p>
   <div class="prog" id="prog" hidden><i></i></div>
   <div class="btns"><button class="pill" id="exportGo" data-t="saveGo"></button><button id="exportClose" data-t="close"></button></div>
@@ -230,27 +230,33 @@ $('#pick0').onchange=e=>{ addFiles(e.target.files); e.target.value=''; };
 const gl=$('#gl').getContext('webgl',{preserveDrawingBuffer:true,premultipliedAlpha:false}), ov=$('#ov'), ox=ov.getContext('2d');
 const VS='attribute vec2 a; varying vec2 uv; void main(){ uv=vec2(a.x*.5+.5,.5-a.y*.5); gl_Position=vec4(a,0.,1.); }';
 const FS=`precision mediump float; varying vec2 uv; uniform sampler2D cur,prev; uniform vec4 cropC,cropP; uniform vec4 adj; uniform float grain,mode,p,hasPrev,t; uniform vec4 duo; uniform vec2 grade;
-uniform sampler2D mask,behind,bgImg; uniform float seg,bgMode,bgDim,behindOn,olMode,olW,asp; uniform vec3 bgCol,olCol; uniform vec4 bgCrop;
+uniform sampler2D mask,behind,bgImg,refM,softM; uniform float sec; uniform float seg,bgMode,bgDim,behindOn,olMode,olW,asp; uniform vec3 bgCol,olCol; uniform vec4 bgCrop;
 vec3 look(vec3 c){ c+=adj.x; c=(c-.5)*adj.y+.5; float l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,adj.z); c.r+=adj.w*.12; c.b-=adj.w*.12;
   l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,grade.x); c.r+=grade.y*.1; c.b-=grade.y*.1;
   vec3 d=mix(vec3(.03,0.,.02),duo.rgb*1.15,smoothstep(.02,.9,l)); return mix(c,d,duo.a); }
 vec3 samp(sampler2D s, vec4 cr, vec2 u){ vec2 q=cr.xy+u*cr.zw; if(q.x<0.||q.y<0.||q.x>1.||q.y>1.) return vec3(0.); return texture2D(s,q).rgb; }
 float h(vec2 v){ return fract(sin(dot(v,vec2(12.9898,78.233))+t)*43758.5453); }
 float h2(vec2 v){ return fract(sin(dot(v,vec2(12.9898,78.233)))*43758.5453); }
-float ring(vec2 q,float r){ float d=0.; for(int i=0;i<12;i++){ float a=float(i)*.5236; d=max(d,texture2D(mask,q+vec2(cos(a),sin(a)*asp)*r*cropC.zw).r); } return d; }
-/* the person stays; behind her: a new background, big words, and an outline around her */
+float vn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(h2(i),h2(i+vec2(1.,0.)),f.x),mix(h2(i+vec2(0.,1.)),h2(i+vec2(1.,1.)),f.x),f.y); }
+/* the person stays; behind her: a new background, big words, and an outline around her.
+   refM is the cut sharpened to the picture's edges; softM is it blurred, so its levels are smooth contours around her */
 vec3 person(vec3 c,vec2 q){
-  float m=smoothstep(.4,.75,texture2D(mask,q).r); vec3 bg=c;
+  vec2 fu=vec2(uv.x,1.-uv.y); float m=smoothstep(.42,.62,texture2D(refM,fu).r), f=texture2D(softM,fu).r; vec3 bg=c;
   if(bgMode>.5&&bgMode<1.5){ vec3 s=vec3(0.); for(int i=0;i<16;i++){ float a=float(i)*2.39996, r=sqrt(float(i)+.5)*.011; s+=texture2D(cur,q+vec2(cos(a),sin(a)*asp)*r*cropC.zw).rgb; } bg=look(s/16.)*.9; }
   else if(bgMode<2.5) bg=c*.3;
   else if(bgMode<3.5) bg=mix(bgCol*1.12,bgCol*.7,uv.y);
   else if(bgMode<4.5) bg=texture2D(bgImg,bgCrop.xy+uv*bgCrop.zw).rgb*bgDim;
   if(behindOn>.5){ vec4 b=texture2D(behind,uv); bg=mix(bg,b.rgb,b.a); }
-  if(olMode>.5){ float d=smoothstep(.3,.65,ring(q,olW)), band=clamp(d-m,0.,1.);
-    if(olMode<1.5) bg=mix(bg,vec3(1.),band);
-    else if(olMode<2.5){ float g=clamp(smoothstep(.15,.6,ring(q,olW*3.))-m,0.,1.); bg+=olCol*g*.8; bg=mix(bg,mix(olCol,vec3(1.),.5),band); }
-    else if(olMode<3.5){ float n=h2(floor(uv*vec2(90.,160.))+floor(t*.006)); bg=mix(bg,vec3(.96),band*step(.3,n)); }
-    else { float f=.75+.25*sin(t*.012+uv.y*40.); float g=clamp(smoothstep(.1,.6,ring(q,olW*2.6))-m,0.,1.)*f; bg+=vec3(1.,.42,.08)*g; bg=mix(bg,vec3(1.,.8,.4),band*.85); } }
+  if(olMode>.5){
+    if(olMode<1.5){ float b=smoothstep(.06,.1,f); bg=mix(bg,vec3(1.),b); }                                   // sticker: thick white
+    else if(olMode<2.5){ float line=smoothstep(.17,.23,f)*(1.-smoothstep(.3,.36,f)), glow=smoothstep(.0,.4,f);  // neon tube
+      bg+=olCol*glow*.55; bg=mix(bg,mix(olCol,vec3(1.),.6),line); }
+    else if(olMode<3.5){ float lv=.2+.09*(vn(uv*vec2(9.,16.)+floor(sec*6.)*7.)-.5);                            // chalk, redrawn 6 times a second
+      float line=smoothstep(lv-.06,lv-.01,f)*(1.-smoothstep(lv+.06,lv+.11,f)), grit=.55+.45*h2(floor(uv*vec2(260.,460.)));
+      bg=mix(bg,vec3(.97),line*grit); }
+    else { float n=vn(vec2(uv.x*12.,uv.y*9.+sec*2.6)), g=smoothstep(.02,.45,f*(.55+.9*n));                    // fire licking upwards
+      bg+=vec3(1.,.4,.06)*g*1.15; bg=mix(bg,vec3(1.,.85,.5),smoothstep(.3,.45,f)*.75); }
+  }
   return mix(bg,c,m); }
 void main(){
   vec3 c=look(samp(cur,cropC,uv));
@@ -271,11 +277,11 @@ let prog,U={},texCur,texPrev,texMask,texBehind,texBg;
   prog=gl.createProgram(); gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS)); gl.linkProgram(prog); gl.useProgram(prog);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const a=gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  ['cur','prev','cropC','cropP','adj','grain','mode','p','hasPrev','t','duo','grade','mask','behind','bgImg','seg','bgMode','bgDim','behindOn','olMode','olW','asp','bgCol','olCol','bgCrop'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+  ['cur','prev','cropC','cropP','adj','grain','mode','p','hasPrev','t','duo','grade','mask','behind','bgImg','seg','bgMode','bgDim','behindOn','olMode','olW','asp','bgCol','olCol','bgCrop','refM','softM','sec'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
   const mk=u=>{ const x=gl.createTexture(); gl.activeTexture(gl.TEXTURE0+u); gl.bindTexture(gl.TEXTURE_2D,x);
     [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]].forEach(([k,v])=>gl.texParameteri(gl.TEXTURE_2D,k,v));
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255])); return x; };
-  texCur=mk(0); texPrev=mk(1); texMask=mk(2); texBehind=mk(3); texBg=mk(4); gl.uniform1i(U.cur,0); gl.uniform1i(U.prev,1); gl.uniform1i(U.mask,2); gl.uniform1i(U.behind,3); gl.uniform1i(U.bgImg,4);
+  texCur=mk(0); texPrev=mk(1); texMask=mk(2); texBehind=mk(3); texBg=mk(4); gl.uniform1i(U.cur,0); gl.uniform1i(U.prev,1); gl.uniform1i(U.mask,2); gl.uniform1i(U.behind,3); gl.uniform1i(U.bgImg,4); gl.uniform1i(U.refM,5); gl.uniform1i(U.softM,6);
 })();
 /* fill the frame: which part of the video shows (cover, then the clip's zoom) */
 function crop(el,zoom){ const vw=el.videoWidth||9, vh=el.videoHeight||16, [aw,ah]=ASPECTS[P.aspect], va=vw/vh, oa=aw/ah; let sx=1, sy=1;
@@ -341,10 +347,10 @@ function frame(now){
     const pc=prevInfo&&prevInfo.from, trans=pc?pc.trans:'none', p=pc?(Tcur-c.t0)/.5:1;
     const f=FILTERS[c.filter]||FILTERS.none, a=c.adj;
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
-    const fx=capsFx(Tcur); gl.uniform4fv(U.cropC,crop(m.el,c.zoom*fx.punch)); gl.uniform4fv(U.duo,fx.duo); gl.uniform2fv(U.grade,fx.grade); gl.uniform4fv(U.cropP,prevInfo?prevInfo.crop:[0,0,1,1]);
-    gl.uniform4f(U.adj,f[0]+a.b,f[1]*a.c,f[2]*a.s,f[3]+a.w); gl.uniform1f(U.grain,f[4]*.12+fx.grain); gl.uniform1f(U.t,now%1000);
+    const fx=capsFx(Tcur), cropC=crop(m.el,c.zoom*fx.punch); gl.uniform4fv(U.cropC,cropC); gl.uniform4fv(U.duo,fx.duo); gl.uniform2fv(U.grade,fx.grade); gl.uniform4fv(U.cropP,prevInfo?prevInfo.crop:[0,0,1,1]);
+    gl.uniform4f(U.adj,f[0]+a.b,f[1]*a.c,f[2]*a.s,f[3]+a.w); gl.uniform1f(U.grain,f[4]*.12+fx.grain); gl.uniform1f(U.t,now%1000); gl.uniform1f(U.sec,(now/1000)%1000);
     gl.uniform1f(U.mode,{fade:1,slide:2,zoom:3,flash:4}[trans]||0); gl.uniform1f(U.p,Math.min(1,p)); gl.uniform1f(U.hasPrev,prevInfo&&trans!=='none'&&p<1?1:0);
-    cutUniforms(m.el,Tcur);
+    cutUniforms(m.el,Tcur,cropC);
     gl.drawArrays(gl.TRIANGLES,0,3);
   } else if(gl){ gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT); }
   drawItems(Tcur); drawCaps(Tcur);
@@ -479,7 +485,7 @@ $('#panel').addEventListener('change',e=>{
 });
 
 /* ---------- saving: the timeline plays through once into a recorder ---------- */
-let res=720;
+let res=1080;
 $('#exportBtn').onclick=()=>{ pause(); $('#exportModal').hidden=false; $('#prog').hidden=true; $('#exportHint').textContent=t('saveHint'); $('#exportGo').disabled=false; };
 $('#exportClose').onclick=()=>{ if(exporting) exporting.cancel(); $('#exportModal').hidden=true; };
 $('#resBtns').addEventListener('click',e=>{ const b=e.target.closest('[data-res]'); if(!b) return; res=+b.dataset.res; $('#resBtns').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); });
@@ -562,9 +568,9 @@ function capsFx(T){ const tp=TPL[P.tpl], fx={punch:1,duo:[0,0,0,0],grade:[1,0],g
 /* ---------- drawing the captions ---------- */
 function drawCaps(T){
   const tp=TPL[P.tpl]; if(!tp) return; const W=ov.width, H=ov.height, x=ox;
-  if(P.tpl==='neon') neonFrame(T,W,H);
+  if(P.tpl==='neon'&&!segLive) neonFrame(ox,T,W,H);
   const ch=chunkAt(T);
-  if(P.tpl==='ember') embers(T,W,H,ch&&wordAt(ch,T)&&wordAt(ch,T).w.key);
+  if(P.tpl==='ember'&&!segLive) embers(ox,T,W,H,ch&&wordAt(ch,T)&&wordAt(ch,T).w.key);
   if(!ch) return;
   const fs=Math.round(tp.size*P.capSize*W), cy=(P.capY??tp.y)*H, cur=wordAt(ch,T);
   x.save(); x.font=tp.font(fs); x.textAlign='left'; x.textBaseline='middle'; x.lineJoin='round';
@@ -609,7 +615,7 @@ function drawWord(tp,wd,s,x0,y,ww,fs,T,isCur,ch){
     if(k&&said){ const g=x.createLinearGradient(0,y-fs*.5,0,y+fs*.5); g.addColorStop(0,'#fff2b0'); g.addColorStop(.5,'#ffa030'); g.addColorStop(1,'#e2401a');
       x.shadowColor='#ff6a1a'; x.shadowBlur=fs*.6*(.8+.2*Math.sin(T*9)); x.fillStyle=g; x.fillText(s,x0,y);
       const d=Math.min(1,age/.4); x.shadowBlur=fs*.3; x.fillStyle='#ffb347'; x.fillRect(x0+ww*(1-d)/2,y+fs*.52,ww*d,Math.max(2,fs*.05)); }
-    else{ x.shadowColor='rgba(0,0,0,.7)'; x.shadowBlur=fs*.25; x.fillStyle=said?'#ffd58a':'rgba(255,222,170,.45)'; x.fillText(s,x0,y); }
+    else{ x.shadowColor='rgba(0,0,0,.95)'; x.shadowBlur=fs*.5; x.fillStyle=said?'#ffe2a8':'rgba(255,226,180,.6)'; x.fillText(s,x0,y); x.shadowBlur=fs*.15; x.fillText(s,x0,y); }
     x.restore(); }
 }
 /* doodles */
@@ -619,12 +625,11 @@ function stars(T,wd,x0,y,ww,fs){ const cols=['#fff','#ff5d8f','#7cf5ff'], age=T-
   for(let i=0;i<3;i++){ const a=hsh(wd.s*13+i), side=i===1?-1:1, q=Math.min(1,Math.max(0,(age-.08*i)/.25));
     const px=ww/2+side*(ww/2+fs*(.35+.3*a)), py=(i===2?.7:-.7)*fs*(.6+.4*a), r=fs*(.22+.12*a)*easeBack(q)*(1+.12*Math.sin(T*6+i));
     if(q>0) sparkle(px,py,r,T*1.5*(i%2?1:-1),cols[i]); } }
-function neonFrame(T,W,H){ const c=ox, m=W*.045, hue=(T*40)%360; c.save(); c.lineWidth=W*.009; c.lineJoin='round';
+function neonFrame(c,T,W,H){ const m=W*.045, hue=(T*40)%360; c.save(); c.lineWidth=W*.009; c.lineJoin='round';
   c.setLineDash([W*.12,W*.05]); c.lineDashOffset=-T*W*.25;
   for(const [col,blur] of [[`hsl(${hue},100%,62%)`,W*.03],['#fff',W*.008]]){ c.strokeStyle=col; c.shadowColor=`hsl(${hue},100%,60%)`; c.shadowBlur=blur; rr(c,m,m,W-2*m,H-2*m,W*.06); c.stroke(); }
-  c.setLineDash([]); c.strokeStyle=`hsl(${(hue+150)%360},100%,65%)`; c.shadowColor=c.strokeStyle; c.shadowBlur=W*.03; c.beginPath();
-  for(let i=0;i<=6;i++){ const px=W*.36+i*W*.047, py=m*2.3+(i%2?-1:1)*W*.018; i?c.lineTo(px,py):c.moveTo(px,py); } c.stroke(); c.restore(); }
-function embers(T,W,H,hot){ const c=ox; c.save(); c.globalCompositeOperation='lighter';
+  c.restore(); }
+function embers(c,T,W,H,hot){ c.save(); c.globalCompositeOperation='lighter';
   for(let i=0;i<34;i++){ const sp=.06+.08*hsh(i*3.1), ph=(T*sp+hsh(i))%1, px=W*(hsh(i*7.7)+.04*Math.sin(T*1.3+i)), py=H*(1.05-ph*1.15), r=W*(.003+.005*hsh(i*1.9))*(hot?1.6:1);
     const a=Math.sin(ph*Math.PI)*(hot?1:.7); const g=c.createRadialGradient(px,py,0,px,py,r*4); g.addColorStop(0,`rgba(255,220,140,${a})`); g.addColorStop(.3,`rgba(255,120,30,${a*.6})`); g.addColorStop(1,'rgba(255,60,0,0)');
     c.fillStyle=g; c.beginPath(); c.arc(px,py,r*4,0,7); c.fill(); }
@@ -804,6 +809,8 @@ function drawBehind(T){ const W=Math.round(ov.width/2), H=Math.round(ov.height/2
     const age=ch?T-ch.s:9, q=Math.min(1,age/.3), sc=1.15-.15*(1-Math.pow(1-q,3)), cols=['#ffffff','#ffd23f','#7cf5ff','#ff5d8f'];
     bx.translate(W/2,H*.3); bx.scale(sc,sc); bx.globalAlpha=q; bx.font=`${fs}px Anton, Impact, sans-serif`; bx.textAlign='center'; bx.textBaseline='middle';
     bx.shadowColor='rgba(0,0,0,.35)'; bx.shadowBlur=fs*.15; bx.fillStyle=ch?cols[ch.i%4]:'#ffffff'; bx.fillText(up,0,0); bx.restore(); }
+  if(P.tpl==='neon'){ any=true; neonFrame(bx,T,W,H); }
+  if(P.tpl==='ember'){ any=true; const c2=chunkAt(T), w2=c2&&wordAt(c2,T); embers(bx,T,W,H,!!(w2&&w2.w.key)); }
   if(P.cut.doodles){ any=true; const cols=['#fff','#ffd23f','#7cf5ff','#ff5d8f','#b48cff'];
     for(let i=0;i<9;i++){ const px=W*(.1+.8*hsh(i*3.3)), py=H*(.08+.6*hsh(i*5.1)), r=W*(.025+.03*hsh(i*1.7))*(1+.15*Math.sin(T*2+i));
       bx.save(); bx.translate(px,py); bx.rotate(T*(.3+.4*hsh(i))*(i%2?1:-1)); bx.fillStyle=cols[i%5]; bx.strokeStyle=cols[(i+2)%5]; bx.lineWidth=W*.008; bx.lineCap='round';
@@ -813,12 +820,44 @@ function drawBehind(T){ const W=Math.round(ov.width/2), H=Math.round(ov.height/2
       bx.restore(); } }
   if(any){ gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D,texBehind); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,bh); }
   return any; }
-function cutUniforms(el,T){ const on=cutActive()&&segRun(el); gl.uniform1f(U.seg,on?1:0); if(!on) return;
+/* the model's mask is only 256 pixels across: sharpen it against the picture's own edges, then blur a copy for outlines */
+const REF_FS=`precision mediump float; varying vec2 uv; uniform sampler2D cur,mask; uniform vec4 cropC; uniform vec2 mt;
+void main(){ vec2 q=cropC.xy+vec2(uv.x,1.-uv.y)*cropC.zw; vec3 c0=texture2D(cur,q).rgb; float s=0., ws=0.;
+  for(int y=-2;y<=2;y++) for(int x=-2;x<=2;x++){ vec2 o=vec2(float(x),float(y))*mt*.8; vec3 c=texture2D(cur,q+o).rgb-c0;
+    float w=exp(-dot(c,c)*28.-float(x*x+y*y)*.18); s+=texture2D(mask,q+o).r*w; ws+=w; }
+  float r=smoothstep(.2,.8,s/ws); gl_FragColor=vec4(r,r,r,1.); }`;
+const BLUR_FS=`precision mediump float; varying vec2 uv; uniform sampler2D src; uniform vec2 dir;
+void main(){ float s=0., ws=0.; for(int i=-6;i<=6;i++){ float w=exp(-float(i*i)/14.); s+=texture2D(src,uv+dir*float(i)).r*w; ws+=w; } gl_FragColor=vec4(vec3(s/ws),1.); }`;
+const PASS={}, PVS='attribute vec2 a; varying vec2 uv; void main(){ uv=a*.5+.5; gl_Position=vec4(a,0.,1.); }';   // passes keep GL's bottom-up rows
+function passProg(fs,names){ const sh=(ty,src)=>{ const x=gl.createShader(ty); gl.shaderSource(x,src); gl.compileShader(x); if(!gl.getShaderParameter(x,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(x)); return x; };
+  const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,PVS)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p);
+  const u={}; names.forEach(n=>u[n]=gl.getUniformLocation(p,n)); return {p,u,a:gl.getAttribLocation(p,'a')}; }
+function target(unit,w,h,old){ if(old&&old.w===w&&old.h===h) return old; const tx=gl.createTexture(); gl.activeTexture(gl.TEXTURE0+unit); gl.bindTexture(gl.TEXTURE_2D,tx);
+  [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]].forEach(([k,v])=>gl.texParameteri(gl.TEXTURE_2D,k,v));
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null); const fb=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,fb); gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tx,0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null); if(old){ gl.deleteTexture(old.tx); gl.deleteFramebuffer(old.fb); } return {tx,fb,w,h,unit}; }
+function runPass(pp,tg){ gl.useProgram(pp.p); gl.bindFramebuffer(gl.FRAMEBUFFER,tg.fb); gl.viewport(0,0,tg.w,tg.h); gl.vertexAttribPointer(pp.a,2,gl.FLOAT,false,0,0); gl.enableVertexAttribArray(pp.a); gl.drawArrays(gl.TRIANGLES,0,3); }
+function refineMask(cropC){
+  if(!PASS.ref){ PASS.ref=passProg(REF_FS,['cur','mask','cropC','mt']); PASS.blur=passProg(BLUR_FS,['src','dir']); }
+  const W=gl.canvas.width, H=gl.canvas.height, hw=Math.round(W/2), hh=Math.round(H/2), qw=Math.round(W/4), qh=Math.round(H/4);
+  // units 5 and 6 are what the picture reads; 7 holds the half-way blur
+  PASS.tRef=target(5,hw,hh,PASS.tRef); PASS.tTmp=target(7,qw,qh,PASS.tTmp); PASS.tSoft=target(6,qw,qh,PASS.tSoft);
+  const R=PASS.ref; gl.useProgram(R.p); gl.uniform1i(R.u.cur,0); gl.uniform1i(R.u.mask,2); gl.uniform4fv(R.u.cropC,cropC); gl.uniform2f(R.u.mt,1/256,1/256);   // one step of the model's own grid
+  gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D,null); runPass(R,PASS.tRef); gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D,PASS.tRef.tx);
+  const B=PASS.blur, sig=W*.012/4/2.6;   // about 1.2% of the width
+  gl.useProgram(B.p); gl.uniform1i(B.u.src,5); gl.uniform2f(B.u.dir,sig/qw,0); gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D,null); runPass(B,PASS.tTmp);
+  gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D,PASS.tTmp.tx);
+  gl.useProgram(B.p); gl.uniform1i(B.u.src,7); gl.uniform2f(B.u.dir,0,sig/qh); gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D,null); runPass(B,PASS.tSoft);
+  gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D,PASS.tSoft.tx);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.useProgram(prog); gl.viewport(0,0,W,H); const a=gl.getAttribLocation(prog,'a'); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0); gl.enableVertexAttribArray(a); }
+let segLive=false;
+function cutUniforms(el,T,cropC){ const on=cutActive()&&segRun(el); segLive=on; gl.uniform1f(U.seg,on?1:0); if(!on) return;
+  refineMask(cropC);
   const c=P.cut, bgm={none:0,blur:1,dark:2,colour:3}[c.bg]; let mode=bgm;
   if(mode===undefined){ if(BG_PICS[c.bg]) useBgPic(c.bg,BG_PICS[c.bg]); else if(c.bg==='photo'&&c.photo) useBgPic('photo:'+c.photo,c.photo);
     mode=bgPic.ready?4:0; if(bgPic.ready) gl.uniform4fv(U.bgCrop,coverCrop(bgPic.img.naturalWidth,bgPic.img.naturalHeight)); }
   gl.uniform1f(U.bgMode,mode); gl.uniform1f(U.bgDim,c.bg==='photo'?1:.85); gl.uniform3fv(U.bgCol,hex3(c.col));
-  gl.uniform1f(U.olMode,{none:0,white:1,neon:2,chalk:3,fire:4}[c.ol]||0); gl.uniform3fv(U.olCol,hex3(c.olCol)); gl.uniform1f(U.olW,c.ol==='white'?.012:.007); gl.uniform1f(U.asp,gl.canvas.width/gl.canvas.height);
+  gl.uniform1f(U.olMode,{none:0,white:1,neon:2,chalk:3,fire:4}[c.ol]||0); gl.uniform3fv(U.olCol,hex3(c.olCol)); gl.uniform1f(U.asp,gl.canvas.width/gl.canvas.height);
   gl.uniform1f(U.behindOn,drawBehind(T)?1:0); }
 function cutPanel(pn){ const c=P.cut, b=(k,v,lab)=>`<button data-cut="${k}" data-v="${v}" class="${c[k]===v?'on':''}">${lab}</button>`;
   const status=SEG.state==='loading'?`<p class="hint">${t('cutLoading')}</p>`:SEG.state==='fail'?`<p class="hint" style="color:var(--warn)">${t('cutFail')}${esc(SEG.err)}</p>`:'';
