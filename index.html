@@ -230,7 +230,7 @@ textarea#text::placeholder{color:var(--mist);font-style:italic}
       <circle class="tw" cx="190" cy="196" r="1.1" fill="#ffd9e8"/><circle class="tw d2" cx="28" cy="210" r="1" fill="#f0c97a"/><circle class="tw d3" cx="368" cy="30" r="1.2" fill="#ffd9e8"/>
     </svg>
     <div class="hello">
-      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v24</span><a class="chip" id="edBtn" href="editor.html" style="color:inherit;text-decoration:none">🎬 <span data-t="editor"></span></a><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
+      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v25</span><a class="chip" id="edBtn" href="editor.html" style="color:inherit;text-decoration:none">🎬 <span data-t="editor"></span></a><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
       <h1 id="greet"></h1>
       <div class="season" id="season"></div>
       <p data-t="ask"></p>
@@ -830,7 +830,7 @@ function idbPut(k,v){return new Promise((ok,bad)=>{const r=indexedDB.open('sf',1
   r.onsuccess=()=>{const tx=r.result.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=()=>ok();tx.onerror=()=>bad(tx.error)}})}
 $('#toEditor').onclick=async()=>{if(!videoBlob)return;$('#play').pause();
   let text='';if(take){const k=[];for(let i=0;i<W.length;i++)if(take.wt[i]!=null)k.push(i);if(k.length)text=W.slice(k[0],k[k.length-1]+1).map(w=>w.raw).join(' ')}
-  try{await idbPut('handoff',{blob:videoBlob,type:videoBlob.type||'video/mp4',text,at:Date.now()});location.href='editor.html?take=1'}
+  try{await idbPut('handoff',{blob:videoBlob,type:videoBlob.type||'video/mp4',text,voice:{clean:CL.on,lvl:CL.lvl,vol:+$('#eVol').value},at:Date.now()});location.href='editor.html?take=1'}
   catch(e){$('#resultHint').textContent=t('edFail')+(e&&e.message||e)}};
 $('#again').onclick=()=>{$('#play').pause();$('#result').hidden=true;resetPos();startCam()};
 /* ---------- take editor: see and hear changes while playing, apply them when saving ---------- */

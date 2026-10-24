@@ -126,6 +126,7 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
     <button data-tab="cut"><i>🧍</i><span data-t="tCut"></span></button>
     <button data-tab="text"><i>T</i><span data-t="tText"></span></button>
     <button data-tab="sticker"><i>☺</i><span data-t="tSticker"></span></button>
+    <button data-tab="voice"><i>🎙</i><span data-t="tVoice"></span></button>
     <button data-tab="music"><i>♪</i><span data-t="tMusic"></span></button>
     <button data-tab="format"><i>▭</i><span data-t="tFormat"></span></button>
   </div>
@@ -143,7 +144,7 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
 <script>
 /* ---------- words ---------- */
 const T={
- en:{title:'Editor',save:'Save',mixing:'Mixing the sound…',when:'When',startHere:'Start here',endHere:'End here',wholeVid:'Whole video',tCut:'Cutout',cutHint:'Finds her in the video, so things can go behind her.',cutLoading:'Loading the cutout… (the first time it downloads about 10 MB)',cutFail:'The cutout could not start on this phone: ',background:'Background',bgNone:'Original',bgBlur:'Blur',bgDark:'Dark',bgColour:'Colour',bgPhoto:'📷 Photo',outline:'Outline',olNone:'None',olWhite:'White',olNeon:'Neon',olChalk:'Chalk',olFire:'Fire',behindTxt:'Big text behind her',behindPh:'e.g. HAPPY',tStyle:'Styles',tCaps:'Captions',
+ en:{title:'Editor',save:'Save',tVoice:'Voice',cleanOn:'Only my voice',cLight:'Light',cStrong:'Strong',cMax:'Max',cleanHint:'Removes steady background noise like traffic, wind rumble, fans and hum, and keeps her voice.',cleaning:'Removing the noise…',cleanDone:'Background noise removed. Play to listen.',cleanFail:'Could not read the sound of this video.',polish:'Clear voice',polishHint:'Cuts thumps and hiss, evens out loud and quiet words, never crackles. The same as in Suffler.',clarity:'Clarity',voiceVol:'Voice volume',mixing:'Mixing the sound…',when:'When',startHere:'Start here',endHere:'End here',wholeVid:'Whole video',tCut:'Cutout',cutHint:'Finds her in the video, so things can go behind her.',cutLoading:'Loading the cutout… (the first time it downloads about 10 MB)',cutFail:'The cutout could not start on this phone: ',background:'Background',bgNone:'Original',bgBlur:'Blur',bgDark:'Dark',bgColour:'Colour',bgPhoto:'📷 Photo',outline:'Outline',olNone:'None',olWhite:'White',olNeon:'Neon',olChalk:'Chalk',olFire:'Fire',behindTxt:'Big text behind her',behindPh:'e.g. HAPPY',tStyle:'Styles',tCaps:'Captions',
   stHint:'Moving captions in one tap. Add the words under Captions; they follow her voice.',stNone:'Off',capSize:'Size',capY:'Height',needWords:'No words yet: go to Captions.',
   capsHint:'Where do the words come from?',hear:'✨ Hear my words',hearNo:'Hear my words needs a free Gemini key, the same one the Oracle in Suffler uses. Paste it here:',fromScript:'Use a Suffler script',typePh:'Or type / paste what she says…',match:'Match to voice',
   listening:'Listening…',matching:'Matching words to the voice…',matched:'Done: {n} words. Play it. A word too early or late? Tap it, move the playhead to where it is said and tap Starts here.',noVoice:'Could not hear speech in this video.',hearFail:'Hearing failed: ',
@@ -159,7 +160,7 @@ const T={
   musicHint:'Pick a song or sound from your phone.',pickMusic:'Choose music',musicVol:'Music',duck:'Lower music under the voice',removeMusic:'Remove music',
   formatHint:'The shape of the finished video.',fit:'Fill the frame (crop) · zoom each clip under Filters',
   saveT:'Save video',saveHint:'The video plays through once while it is saved, so it takes as long as the video. On iPhone it goes to Files › Downloads; from there Share › Save Video puts it in Photos.',saveGo:'Save',close:'Close',saving:'Saving… ',saved:'Saved. Look in your downloads.',saveFail:'This browser could not save the video.',leave:'Leave the editor? Your edit is not kept.'},
- uk:{title:'Редактор',save:'Зберегти',mixing:'Зводжу звук…',when:'Коли',startHere:'Почати тут',endHere:'Закінчити тут',wholeVid:'Усе відео',tCut:'Вирізати',cutHint:'Знаходить її у відео, щоб щось могло бути позаду неї.',cutLoading:'Завантажую вирізання… (першого разу це приблизно 10 МБ)',cutFail:'Вирізання не запустилось на цьому телефоні: ',background:'Фон',bgNone:'Оригінал',bgBlur:'Розмиття',bgDark:'Темний',bgColour:'Колір',bgPhoto:'📷 Фото',outline:'Контур',olNone:'Без',olWhite:'Білий',olNeon:'Неон',olChalk:'Крейда',olFire:'Вогонь',behindTxt:'Великий текст позаду неї',behindPh:'напр. ЩАСТЯ',tStyle:'Стилі',tCaps:'Субтитри',
+ uk:{title:'Редактор',save:'Зберегти',tVoice:'Голос',cleanOn:'Лише мій голос',cLight:'Легко',cStrong:'Сильно',cMax:'Максимум',cleanHint:'Прибирає постійний фоновий шум — транспорт, гул вітру, вентилятори, дзижчання — і залишає її голос.',cleaning:'Прибираю шум…',cleanDone:'Фоновий шум прибрано. Увімкни, щоб послухати.',cleanFail:'Не вдалося прочитати звук цього відео.',polish:'Чистий голос',polishHint:'Прибирає стуки й шипіння, вирівнює гучні й тихі слова, без тріску. Так само, як у Suffler.',clarity:'Чіткість',voiceVol:'Гучність голосу',mixing:'Зводжу звук…',when:'Коли',startHere:'Почати тут',endHere:'Закінчити тут',wholeVid:'Усе відео',tCut:'Вирізати',cutHint:'Знаходить її у відео, щоб щось могло бути позаду неї.',cutLoading:'Завантажую вирізання… (першого разу це приблизно 10 МБ)',cutFail:'Вирізання не запустилось на цьому телефоні: ',background:'Фон',bgNone:'Оригінал',bgBlur:'Розмиття',bgDark:'Темний',bgColour:'Колір',bgPhoto:'📷 Фото',outline:'Контур',olNone:'Без',olWhite:'Білий',olNeon:'Неон',olChalk:'Крейда',olFire:'Вогонь',behindTxt:'Великий текст позаду неї',behindPh:'напр. ЩАСТЯ',tStyle:'Стилі',tCaps:'Субтитри',
   stHint:'Живі субтитри в один дотик. Додай слова у «Субтитри» — вони йдуть за голосом.',stNone:'Без',capSize:'Розмір',capY:'Висота',needWords:'Слів ще немає: відкрий «Субтитри».',
   capsHint:'Звідки взяти слова?',hear:'✨ Почути мої слова',hearNo:'Для цього потрібен безкоштовний ключ Gemini, той самий, що в Оракула в Suffler. Встав його сюди:',fromScript:'Взяти сценарій Suffler',typePh:'Або напиши / встав, що вона каже…',match:'Підігнати під голос',
   listening:'Слухаю…',matching:'Підганяю слова під голос…',matched:'Готово: {n} слів. Програй. Слово зарано чи запізно? Торкнись його, постав позначку туди, де воно звучить, і натисни «Звідси».',noVoice:'Не чути мови в цьому відео.',hearFail:'Не вдалося почути: ',
@@ -203,10 +204,10 @@ const selClip=()=>sel&&sel.kind==='clip'?P.clips.find(c=>c.id===sel.id):null;
 const selItem=()=>sel&&sel.kind==='item'?P.items.find(i=>i.id===sel.id):null;
 
 /* ---------- sound: every video and the music go through one mix (needed for volume on iPhone and for saving) ---------- */
-let AC=null, master=null;
-function ensureAC(){ if(AC){ if(AC.state==='suspended') AC.resume(); return; } try{ AC=new (window.AudioContext||window.webkitAudioContext)(); master=AC.createGain(); master.connect(AC.destination);
+let AC=null, master=null, voiceIn=null;
+function ensureAC(){ if(AC){ if(AC.state==='suspended') AC.resume(); return; } try{ AC=new (window.AudioContext||window.webkitAudioContext)(); master=AC.createGain(); master.connect(AC.destination); voiceIn=AC.createGain(); applyVoice();
   for(const m of Object.values(media)) hookAudio(m); if(P.music) hookAudio(P.music); }catch(e){ AC=null; } }
-function hookAudio(m){ if(!AC||m.gain) return; try{ const s=AC.createMediaElementSource(m.el); m.gain=AC.createGain(); m.gain.gain.value=0; s.connect(m.gain); m.gain.connect(master); }catch(e){} }
+function hookAudio(m){ if(!AC||m.gain) return; try{ const s=AC.createMediaElementSource(m.el); m.gain=AC.createGain(); m.gain.gain.value=0; s.connect(m.gain); m.gain.connect(m===P.music?master:voiceIn); }catch(e){} }
 
 /* ---------- adding videos ---------- */
 async function addFiles(files){
@@ -351,7 +352,7 @@ function frame(now){
       if(pc&&playing&&curIdx===i-1){ const pm=mediaFor(pc); upload(texPrev,1,pm.el); prevInfo={crop:crop(pm.el,pc.zoom),from:pc}; } else prevInfo=null;
       if(pc&&mediaFor(pc)!==m){ mediaFor(pc).el.pause(); if(mediaFor(pc).gain) mediaFor(pc).gain.gain.value=0; }
       curIdx=i; if(!(playing&&Math.abs(m.el.currentTime-src)<.15)) m.el.currentTime=src; T0=Tcur; now0=now; }   // a cut that continues the same video plays straight on
-    if(m.gain) m.gain.gain.value=playing?c.vol:0;
+    const vp=voicePreview(c,m); if(m.gain) m.gain.gain.value=playing&&!vp?c.vol:0;
     if(playing){ if(m.el.paused){ const pr=m.el.play(); if(pr) pr.catch(()=>{}); }
       if(exporting){ const d=src-m.el.currentTime; if(Math.abs(d)>.6&&!m.el.seeking) m.el.currentTime=src; else m.el.playbackRate=c.speed*Math.min(1.12,Math.max(.88,1+d*.8)); }   // catch up gently
       else if(m.el.playbackRate!==c.speed) m.el.playbackRate=c.speed; }
@@ -444,6 +445,7 @@ function renderPanel(){
       ${P.music?`${sliderRow('mvol',t('musicVol'),0,1.5,.05,P.music.vol,Math.round(P.music.vol*100)+'%')}<label class="sl" style="grid-template-columns:1fr auto"><span>${t('duck')}</span><input type="checkbox" id="mduck"${P.music.duck?' checked':''}></label><div class="btns"><button data-act="delMusic" class="warn">🗑 ${t('removeMusic')}</button></div>`:''}`;
   else if(tab==='style'||tab==='caps') capsPanel(pn,c);
   else if(tab==='cut') cutPanel(pn);
+  else if(tab==='voice') voicePanel(pn);
   else if(tab==='format') pn.innerHTML=`<p class="hint">${t('formatHint')}</p><div class="btns">${Object.keys(ASPECTS).map(k=>`<button data-aspect="${k}" class="${P.aspect===k?'on':''}">${ASPECTS[k].join(':')}</button>`).join('')}</div><p class="hint">${t('fit')}</p>`;
 }
 function refresh(){ layout(); if(sel&&sel.kind==='clip'&&!selClip()) sel=null; if(sel&&sel.kind==='item'&&!selItem()) sel=null; renderTimeline(); renderPanel(); }
@@ -524,10 +526,12 @@ function stretch(buf,from,len,speed,R){ const src=buf.numberOfChannels>1?buf.get
   for(let i=0;i<outLen;i++) if(norm[i]>1e-3) out[i]/=norm[i];
   const b=new AudioBuffer({length:outLen,numberOfChannels:1,sampleRate:sr}); b.copyToChannel(out.subarray(0,outLen),0); return b; }
 async function mixSound(){ const R=48000, off=new OfflineAudioContext(2,Math.max(1,Math.ceil(total*R)),R), ramp=.008;
-  const put=(buf,at,from,len,rate,vol)=>{ if(vol<=0||len<=0) return; const s=off.createBufferSource(), g=off.createGain(); s.buffer=buf; s.playbackRate.value=rate;
+  const vbus=off.createGain(); voiceChain(off,vbus,P.voice).out.connect(off.destination);
+  const put=(buf,at,from,len,rate,vol,to)=>{ if(vol<=0||len<=0) return; const s=off.createBufferSource(), g=off.createGain(); s.buffer=buf; s.playbackRate.value=rate;
     g.gain.setValueAtTime(0,at); g.gain.linearRampToValueAtTime(vol,at+ramp); g.gain.setValueAtTime(vol,Math.max(at+ramp,at+len-ramp)); g.gain.linearRampToValueAtTime(0,at+len);
-    s.connect(g); g.connect(off.destination); s.start(at,from); s.stop(at+len); };
-  for(const c of P.clips){ const m=mediaFor(c); try{ if(!m.buf) m.buf=await decodeFile(m.el.src); }catch(e){ m.buf=null; } if(m.buf){ if(Math.abs(c.speed-1)<.01) put(m.buf,c.t0,c.inS,c.len,1,c.vol); else put(stretch(m.buf,c.inS,c.len,c.speed),c.t0,0,c.len,1,c.vol); } }
+    s.connect(g); g.connect(to||off.destination); s.start(at,from); s.stop(at+len); };
+  for(const c of P.clips){ const m=mediaFor(c); let buf=null; try{ buf=P.voice.clean?await cleanFor(m):(m.buf||(m.buf=await decodeFile(m.el.src))); }catch(e){ buf=null; }
+    if(buf){ if(Math.abs(c.speed-1)<.01) put(buf,c.t0,c.inS,c.len,1,c.vol,vbus); else put(stretch(buf,c.inS,c.len,c.speed),c.t0,0,c.len,1,c.vol,vbus); } }
   if(P.music){ const mu=P.music; try{ if(!mu.buf) mu.buf=await decodeFile(mu.el.src); }catch(e){ mu.buf=null; }
     if(mu.buf) put(mu.buf,mu.at,0,Math.min(mu.buf.duration,total-mu.at),1,mu.vol*(mu.duck&&P.clips.some(c=>c.vol>0)?.35:1)); }
   return await off.startRendering(); }
@@ -939,13 +943,113 @@ $('#panel').addEventListener('click',e=>{ if(tab!=='cut') return; const b=e.targ
 $('#panel').addEventListener('input',e=>{ if(e.target.id==='behindTxt'){ P.cut.behind=e.target.value; if(cutActive()) segLoad(); } });
 $('#panel').addEventListener('change',e=>{ if(e.target.id==='bgPhoto'&&e.target.files[0]){ P.cut.photo=URL.createObjectURL(e.target.files[0]); P.cut.bg='photo'; segLoad(); renderPanel(); } });
 
+/* ---------- voice: the same cleaning and voice chain as Suffler's Sound tool ---------- */
+P.voice={clean:false,lvl:'strong',polish:true,clarity:0,vol:0};
+const dB=x=>Math.pow(10,x/20);
+/* works on a live or an offline audio context, so playing and saving sound the same */
+function voiceChain(ctx,src,o){
+  const n=[]; let at=src;
+  if(o.polish){
+    const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=110; hp.Q.value=.7;
+    const hp2=ctx.createBiquadFilter(); hp2.type='highpass'; hp2.frequency.value=110; hp2.Q.value=.7;   // two stages: cuts the thumps from hand movement
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=13000;                    // cuts hiss above the voice
+    const mud=ctx.createBiquadFilter(); mud.type='lowshelf'; mud.frequency.value=220; mud.gain.value=-o.clarity*4;
+    const pres=ctx.createBiquadFilter(); pres.type='peaking'; pres.frequency.value=3200; pres.Q.value=.8; pres.gain.value=o.clarity*6;
+    const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-22; comp.knee.value=12; comp.ratio.value=2; comp.attack.value=.008; comp.release.value=.3;
+    n.push(hp,hp2,lp,mud,pres,comp); }
+  const vol=ctx.createGain(); vol.gain.value=dB(o.vol||0); n.push(vol);
+  if(o.polish){ const lim=ctx.createDynamicsCompressor(); lim.threshold.value=-7; lim.knee.value=2; lim.ratio.value=20; lim.attack.value=.001; lim.release.value=.12;
+    const trim=ctx.createGain(); trim.gain.value=dB(-1.5); n.push(lim,trim); }   // headroom: no crackle from clipping
+  for(const x of n){ at.connect(x); at=x; } return {out:at}; }
+let voiceNodes=null;
+function applyVoice(){ if(!AC||!voiceIn) return; try{ voiceIn.disconnect(); }catch(e){} if(voiceNodes) try{ voiceNodes.out.disconnect(); }catch(e){}
+  voiceNodes=voiceChain(AC,voiceIn,P.voice); voiceNodes.out.connect(master); }
+function cleanVoice(x,rate,strength,onProgress){
+  const N=2048, H=N/4, bins=N/2+1, win=new Float32Array(N);
+  for(let i=0;i<N;i++) win[i]=.5-.5*Math.cos(2*Math.PI*i/N);
+  // in-place radix-2 FFT
+  const rev=new Uint32Array(N); for(let i=0,j=0;i<N;i++){ rev[i]=j; let b=N>>1; while(j&b){ j^=b; b>>=1; } j|=b; }
+  const cosT=new Float32Array(N/2), sinT=new Float32Array(N/2); for(let i=0;i<N/2;i++){ cosT[i]=Math.cos(2*Math.PI*i/N); sinT[i]=-Math.sin(2*Math.PI*i/N); }
+  function fft(re,im,inv){
+    for(let i=0;i<N;i++){ const j=rev[i]; if(j>i){ let t=re[i]; re[i]=re[j]; re[j]=t; t=im[i]; im[i]=im[j]; im[j]=t; } }
+    for(let size=2;size<=N;size<<=1){ const half=size>>1, step=N/size;
+      for(let i=0;i<N;i+=size) for(let k=0;k<half;k++){ const c=cosT[k*step], s=inv?-sinT[k*step]:sinT[k*step], a=i+k, b=a+half;
+        const tr=re[b]*c-im[b]*s, ti=re[b]*s+im[b]*c; re[b]=re[a]-tr; im[b]=im[a]-ti; re[a]+=tr; im[a]+=ti; } }
+  }
+  const frames=Math.max(1,Math.ceil((x.length-N)/H)+1), pad=new Float32Array((frames-1)*H+N); pad.set(x);
+  const mags=new Float32Array(frames*bins), re=new Float32Array(N), im=new Float32Array(N);
+  for(let f=0;f<frames;f++){ const o=f*H; for(let i=0;i<N;i++){ re[i]=pad[o+i]*win[i]; im[i]=0; } fft(re,im,false);
+    for(let k=0;k<bins;k++) mags[f*bins+k]=Math.hypot(re[k],im[k]); }
+  // the background level of each band: a low percentile over time (the level it sits at between words)
+  const noise=new Float32Array(bins), col=new Float32Array(frames);
+  for(let k=0;k<bins;k++){ for(let f=0;f<frames;f++) col[f]=mags[f*bins+k]; const s=Float32Array.from(col).sort(); noise[k]=s[Math.floor(frames*.2)]||0; }
+  for(let k=1;k<bins-1;k++) noise[k]=(noise[k-1]+2*noise[k]+noise[k+1])/4;
+  // gains: down where a band is at the background level, up where her voice rises above it
+  const gains=new Float32Array(frames*bins), [over,floor]=strength,  lowCut=Math.round(80/(rate/N));
+  for(let f=0;f<frames;f++) for(let k=0;k<bins;k++){ const m=mags[f*bins+k], snr=m/(noise[k]*over+1e-9);
+    let g=snr<=1?floor:Math.max(floor,1-1/(snr*snr)); if(k<lowCut) g=floor; gains[f*bins+k]=g; }
+  // smooth across pitch bands, then over time (fast up, slower down) so words keep their tails
+  const tmp=new Float32Array(bins);
+  for(let f=0;f<frames;f++){ const o=f*bins; for(let k=0;k<bins;k++){ let s=0,c=0; for(let d=-2;d<=2;d++){ const j=k+d; if(j>=0&&j<bins){ s+=gains[o+j]; c++; } } tmp[k]=s/c; } gains.set(tmp,o); }
+  for(let k=0;k<bins;k++){ let prev=floor; for(let f=0;f<frames;f++){ const i=f*bins+k, g=gains[i]; prev=g>prev?g:prev*.72+g*.28; gains[i]=prev; } }
+  // put it back together (overlap-add)
+  const out=new Float32Array(pad.length), norm=new Float32Array(pad.length);
+  for(let f=0;f<frames;f++){ const o=f*H; for(let i=0;i<N;i++){ re[i]=pad[o+i]*win[i]; im[i]=0; } fft(re,im,false);
+    for(let k=0;k<bins;k++){ const g=gains[f*bins+k]; re[k]*=g; im[k]*=g; if(k>0&&k<N/2){ re[N-k]=re[k]; im[N-k]=-im[k]; } }
+    fft(re,im,true); for(let i=0;i<N;i++){ out[o+i]+=re[i]/N*win[i]; norm[o+i]+=win[i]*win[i]; }
+    if(onProgress&&f%400===0) onProgress(f/frames); }
+  const y=new Float32Array(x.length); for(let i=0;i<x.length;i++) y[i]=norm[i]>1e-6?out[i]/norm[i]:0;
+  return y;
+}
+const CLEAN_LVL={light:[2.2,.08],strong:[3,.03],max:[4,.02]};
+let cleanBusy='';
+/* the video's sound as one 48 kHz channel, cleaned once per strength */
+async function cleanFor(m){ ensureAC(); m.clean=m.clean||{}; if(m.clean[P.voice.lvl]) return m.clean[P.voice.lvl];
+  const lvl=P.voice.lvl, dec=m.buf||(m.buf=await decodeFile(m.el.src));
+  const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(dec.duration*48000)),48000), s=off.createBufferSource(); s.buffer=dec; s.connect(off.destination); s.start();
+  const x=(await off.startRendering()).getChannelData(0); await new Promise(r=>setTimeout(r,30));
+  const y=cleanVoice(x,48000,CLEAN_LVL[lvl]), b=AC.createBuffer(1,y.length,48000); b.copyToChannel(y,0); return m.clean[lvl]=b; }
+/* in the preview the cleaned voice plays in step with the video; returns true while it is standing in for the video's sound */
+const VP={src:null,g:null,clip:null,lvl:'',at:0,from:0,rate:1};
+function vpStop(){ if(VP.src){ try{ VP.src.stop(); }catch(e){} try{ VP.src.disconnect(); }catch(e){} } VP.src=null; VP.clip=null; }
+function voicePreview(c,m){
+  const b=P.voice.clean&&m.clean&&m.clean[P.voice.lvl];
+  if(!b||!playing||exporting||!AC){ vpStop(); return !!b&&!exporting; }
+  const v=m.el.currentTime, want=VP.src?VP.from+(AC.currentTime-VP.at)*VP.rate:-9;
+  if(VP.clip!==c||VP.lvl!==P.voice.lvl||Math.abs(want-v)>.12||m.el.paused||m.el.seeking){
+    vpStop(); if(m.el.paused||m.el.seeking) return true;
+    const s=AC.createBufferSource(), g=AC.createGain(); s.buffer=b; s.playbackRate.value=c.speed; g.gain.value=c.vol; s.connect(g); g.connect(voiceIn);
+    VP.at=AC.currentTime+.02; VP.from=v+.02*c.speed; VP.rate=c.speed; s.start(VP.at,Math.min(VP.from,b.duration)); s.onended=()=>{ if(VP.src===s) VP.src=null; };
+    Object.assign(VP,{src:s,g,clip:c,lvl:P.voice.lvl}); }
+  else if(VP.g) VP.g.gain.value=c.vol;
+  return true; }
+async function cleanAll(){ const ms=[...new Set(P.clips.map(c=>mediaFor(c)))]; cleanBusy=t('cleaning'); renderPanel();
+  try{ for(const m of ms) await cleanFor(m); cleanBusy=t('cleanDone'); }catch(e){ console.error(e); P.voice.clean=false; cleanBusy=t('cleanFail'); }
+  renderPanel(); }
+function voicePanel(pn){ const v=P.voice;
+  pn.innerHTML=`<label class="sl" style="grid-template-columns:1fr auto"><span><b>${t('cleanOn')}</b></span><input type="checkbox" id="vClean"${v.clean?' checked':''}></label>
+    ${v.clean?`<div class="btns">${['light','strong','max'].map(k=>`<button data-vlvl="${k}" class="${v.lvl===k?'on':''}">${t('c'+k[0].toUpperCase()+k.slice(1))}</button>`).join('')}</div>`:''}
+    <p class="hint">${esc(cleanBusy||t('cleanHint'))}</p>
+    <label class="sl" style="grid-template-columns:1fr auto"><span><b>${t('polish')}</b></span><input type="checkbox" id="vPolish"${v.polish?' checked':''}></label>
+    <p class="hint">${t('polishHint')}</p>
+    ${v.polish?sliderRow('vClar',t('clarity'),0,1,.05,v.clarity,Math.round(v.clarity*100)+'%'):''}
+    ${sliderRow('vVol',t('voiceVol'),-12,15,1,v.vol,(v.vol>0?'+':'')+v.vol+' dB')}`; }
+$('#panel').addEventListener('click',e=>{ if(tab!=='voice') return; const b=e.target.closest('[data-vlvl]'); if(!b) return; P.voice.lvl=b.dataset.vlvl; vpStop(); cleanAll(); e.stopImmediatePropagation(); },true);
+$('#panel').addEventListener('change',e=>{ if(tab!=='voice') return; const id=e.target.id;
+  if(id==='vClean'){ P.voice.clean=e.target.checked; vpStop(); ensureAC(); if(P.voice.clean) cleanAll(); else { cleanBusy=''; renderPanel(); } }
+  if(id==='vPolish'){ P.voice.polish=e.target.checked; ensureAC(); applyVoice(); renderPanel(); } });
+$('#panel').addEventListener('input',e=>{ if(tab!=='voice') return; const id=e.target.id, v=+e.target.value, o=$('#'+id+'O');
+  if(id==='vClar'){ P.voice.clarity=v; o.textContent=Math.round(v*100)+'%'; applyVoice(); }
+  if(id==='vVol'){ P.voice.vol=v; o.textContent=(v>0?'+':'')+v+' dB'; applyVoice(); } });
 /* a take sent from Suffler: open it, and time the words she read to her voice */
 if(/[?&]take=1/.test(location.search)) (async()=>{ history.replaceState(null,'',location.pathname);
   try{ const db=await new Promise((ok,bad)=>{ const r=indexedDB.open('sf',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); });
     const h=await new Promise((ok,bad)=>{ const q=db.transaction('kv').objectStore('kv').get('handoff'); q.onsuccess=()=>ok(q.result); q.onerror=()=>bad(q.error); });
     if(!h||!h.blob) return; db.transaction('kv','readwrite').objectStore('kv').delete('handoff');
     const ext=/mp4/.test(h.type)?'mp4':'webm'; await addFiles([new File([h.blob],'take.'+ext,{type:h.type})]);
-    const c=P.clips[P.clips.length-1]; sel={kind:'clip',id:c.id}; tab='caps'; refresh();
+    const c=P.clips[P.clips.length-1]; sel={kind:'clip',id:c.id}; tab='caps';
+    if(h.voice){ Object.assign(P.voice,h.voice); ensureAC(); applyVoice(); if(P.voice.clean) cleanAll(); }   // her Sound settings from the take screen
+    refresh();
     if(h.text&&h.text.trim()) capRun(c,m=>matchText(m,h.text),t('matching'));
   }catch(e){ console.error(e); }
 })();
