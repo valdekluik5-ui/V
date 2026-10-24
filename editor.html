@@ -2,7 +2,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=21"><link rel="icon" href="icon-192.png?v=21">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#130a1b">
 <title>Suffler Editor</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Nunito:wght@400;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Cormorant+Garamond:ital,wght@0,600;1,500;1,700&family=Nunito:wght@400;600;700;800;900&display=swap">
 <style>
 /* Layout: preview on top, transport, a scrolling timeline (clips, text and stickers, music), then tool tabs and the
    selected tool's panel. Phone first (iPhone Safari), single dark look that follows the look picked in Suffler. */
@@ -84,6 +84,15 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
 .prog{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden}.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
 .file{position:relative;overflow:hidden}
 .file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.tpls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tpl{aspect-ratio:5/4;border:2px solid transparent;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:6px;overflow:hidden}
+.tpl b{font-size:12px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000}
+.tpl.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.words{display:flex;flex-wrap:wrap;gap:5px;max-height:120px;overflow-y:auto}
+.words button{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:5px 8px;font-weight:700;font-size:13px}
+.words button.key{color:var(--gold);border-color:var(--gold)}
+.words button.now{box-shadow:inset 0 -3px 0 var(--acc)}
+.words button.on{background:var(--acc);color:var(--ink)}
 </style></head><body>
 <div class="app">
   <div class="top"><a href="./" id="back">‹ Suffler</a><h1 data-t="title"></h1><button class="pill" id="exportBtn" data-t="save" disabled></button></div>
@@ -109,6 +118,8 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
     <button data-tab="speed"><i>⏩</i><span data-t="tSpeed"></span></button>
     <button data-tab="look"><i>✦</i><span data-t="tLook"></span></button>
     <button data-tab="trans"><i>⧉</i><span data-t="tTrans"></span></button>
+    <button data-tab="style"><i>✨</i><span data-t="tStyle"></span></button>
+    <button data-tab="caps"><i>💬</i><span data-t="tCaps"></span></button>
     <button data-tab="text"><i>T</i><span data-t="tText"></span></button>
     <button data-tab="sticker"><i>☺</i><span data-t="tSticker"></span></button>
     <button data-tab="music"><i>♪</i><span data-t="tMusic"></span></button>
@@ -128,7 +139,11 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
 <script>
 /* ---------- words ---------- */
 const T={
- en:{title:'Editor',save:'Save',emptyT:'Make a video',emptyD:'Add videos from your phone. Cut them, change the speed, add text, stickers, filters, transitions and music.',addVideos:'Add videos',
+ en:{title:'Editor',save:'Save',tStyle:'Styles',tCaps:'Captions',
+  stHint:'Moving captions in one tap. Add the words under Captions; they follow her voice.',stNone:'Off',capSize:'Size',capY:'Height',needWords:'No words yet: go to Captions.',
+  capsHint:'Where do the words come from?',hear:'✨ Hear my words',hearNo:'Hear my words needs a free Gemini key, the same one the Oracle in Suffler uses. Paste it here:',fromScript:'Use a Suffler script',typePh:'Or type / paste what she says…',match:'Match to voice',
+  listening:'Listening…',matching:'Matching words to the voice…',matched:'Done: {n} words. Play it. A word too early or late? Tap it, move the playhead to where it is said and tap Starts here.',noVoice:'Could not hear speech in this video.',hearFail:'Hearing failed: ',
+  startsHere:'⏱ Starts here',keyWord:'★ Key word',wordPh:'Word',clearCaps:'Remove captions',capsFor:'Captions for this video',emptyT:'Make a video',emptyD:'Add videos from your phone. Cut them, change the speed, add text, stickers, filters, transitions and music.',addVideos:'Add videos',
   tAdd:'Add',tEdit:'Edit',tSpeed:'Speed',tLook:'Filters',tTrans:'Transition',tText:'Text',tSticker:'Stickers',tMusic:'Music',tFormat:'Format',
   addHint:'Pick videos from your phone. They go on the timeline in the order you pick them.',addMore:'Add videos',
   pickClip:'Tap a clip on the timeline first.',split:'Split here',del:'Delete',dup:'Duplicate',left:'Move left',right:'Move right',trimS:'Start',trimE:'End',vol:'Volume',
@@ -140,7 +155,11 @@ const T={
   musicHint:'Pick a song or sound from your phone.',pickMusic:'Choose music',musicVol:'Music',duck:'Lower music under the voice',removeMusic:'Remove music',
   formatHint:'The shape of the finished video.',fit:'Fill the frame (crop) · zoom each clip under Filters',
   saveT:'Save video',saveHint:'The video plays through once while it is saved, so it takes as long as the video. On iPhone it goes to Files › Downloads; from there Share › Save Video puts it in Photos.',saveGo:'Save',close:'Close',saving:'Saving… ',saved:'Saved. Look in your downloads.',saveFail:'This browser could not save the video.',leave:'Leave the editor? Your edit is not kept.'},
- uk:{title:'Редактор',save:'Зберегти',emptyT:'Зроби відео',emptyD:'Додай відео з телефона. Обрізай, змінюй швидкість, додавай текст, стікери, фільтри, переходи й музику.',addVideos:'Додати відео',
+ uk:{title:'Редактор',save:'Зберегти',tStyle:'Стилі',tCaps:'Субтитри',
+  stHint:'Живі субтитри в один дотик. Додай слова у «Субтитри» — вони йдуть за голосом.',stNone:'Без',capSize:'Розмір',capY:'Висота',needWords:'Слів ще немає: відкрий «Субтитри».',
+  capsHint:'Звідки взяти слова?',hear:'✨ Почути мої слова',hearNo:'Для цього потрібен безкоштовний ключ Gemini, той самий, що в Оракула в Suffler. Встав його сюди:',fromScript:'Взяти сценарій Suffler',typePh:'Або напиши / встав, що вона каже…',match:'Підігнати під голос',
+  listening:'Слухаю…',matching:'Підганяю слова під голос…',matched:'Готово: {n} слів. Програй. Слово зарано чи запізно? Торкнись його, постав позначку туди, де воно звучить, і натисни «Звідси».',noVoice:'Не чути мови в цьому відео.',hearFail:'Не вдалося почути: ',
+  startsHere:'⏱ Звідси',keyWord:'★ Ключове',wordPh:'Слово',clearCaps:'Прибрати субтитри',capsFor:'Субтитри для цього відео',emptyT:'Зроби відео',emptyD:'Додай відео з телефона. Обрізай, змінюй швидкість, додавай текст, стікери, фільтри, переходи й музику.',addVideos:'Додати відео',
   tAdd:'Додати',tEdit:'Монтаж',tSpeed:'Швидкість',tLook:'Фільтри',tTrans:'Перехід',tText:'Текст',tSticker:'Стікери',tMusic:'Музика',tFormat:'Формат',
   addHint:'Обери відео з телефона. Вони стануть на таймлайн у тому порядку, як ти їх обереш.',addMore:'Додати відео',
   pickClip:'Спершу торкнись кліпу на таймлайні.',split:'Розрізати тут',del:'Видалити',dup:'Дублювати',left:'Ліворуч',right:'Праворуч',trimS:'Початок',trimE:'Кінець',vol:'Гучність',
@@ -209,8 +228,10 @@ $('#pick0').onchange=e=>{ addFiles(e.target.files); e.target.value=''; };
 /* ---------- drawing: WebGL for the picture (filters, zoom, transitions), a 2D layer for text and stickers ---------- */
 const gl=$('#gl').getContext('webgl',{preserveDrawingBuffer:true,premultipliedAlpha:false}), ov=$('#ov'), ox=ov.getContext('2d');
 const VS='attribute vec2 a; varying vec2 uv; void main(){ uv=vec2(a.x*.5+.5,.5-a.y*.5); gl_Position=vec4(a,0.,1.); }';
-const FS=`precision mediump float; varying vec2 uv; uniform sampler2D cur,prev; uniform vec4 cropC,cropP; uniform vec4 adj; uniform float grain,mode,p,hasPrev,t;
-vec3 look(vec3 c){ c+=adj.x; c=(c-.5)*adj.y+.5; float l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,adj.z); c.r+=adj.w*.12; c.b-=adj.w*.12; return c; }
+const FS=`precision mediump float; varying vec2 uv; uniform sampler2D cur,prev; uniform vec4 cropC,cropP; uniform vec4 adj; uniform float grain,mode,p,hasPrev,t; uniform vec4 duo; uniform vec2 grade;
+vec3 look(vec3 c){ c+=adj.x; c=(c-.5)*adj.y+.5; float l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,adj.z); c.r+=adj.w*.12; c.b-=adj.w*.12;
+  l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,grade.x); c.r+=grade.y*.1; c.b-=grade.y*.1;
+  vec3 d=mix(vec3(.03,0.,.02),duo.rgb*1.15,smoothstep(.02,.9,l)); return mix(c,d,duo.a); }
 vec3 samp(sampler2D s, vec4 cr, vec2 u){ vec2 q=cr.xy+u*cr.zw; if(q.x<0.||q.y<0.||q.x>1.||q.y>1.) return vec3(0.); return texture2D(s,q).rgb; }
 float h(vec2 v){ return fract(sin(dot(v,vec2(12.9898,78.233))+t)*43758.5453); }
 void main(){
@@ -231,7 +252,7 @@ let prog,U={},texCur,texPrev;
   prog=gl.createProgram(); gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS)); gl.linkProgram(prog); gl.useProgram(prog);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const a=gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  ['cur','prev','cropC','cropP','adj','grain','mode','p','hasPrev','t'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+  ['cur','prev','cropC','cropP','adj','grain','mode','p','hasPrev','t','duo','grade'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
   const mk=u=>{ const x=gl.createTexture(); gl.activeTexture(gl.TEXTURE0+u); gl.bindTexture(gl.TEXTURE_2D,x);
     [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]].forEach(([k,v])=>gl.texParameteri(gl.TEXTURE_2D,k,v));
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255])); return x; };
@@ -248,7 +269,7 @@ function sizeCanvases(full){ const [aw,ah]=ASPECTS[P.aspect], long=full||(window
   $('#stage').style.aspectRatio=aw+'/'+ah; fitStage(); }
 function fitStage(){ const w=$('#stagewrap'), [aw,ah]=ASPECTS[P.aspect], ar=aw/ah, W=w.clientWidth, H=w.clientHeight; const s=$('#stage');
   if(W/H>ar){ s.style.height=H+'px'; s.style.width=Math.round(H*ar)+'px'; } else { s.style.width=W+'px'; s.style.height=Math.round(W/ar)+'px'; } }
-addEventListener('resize',fitStage);
+addEventListener('resize',fitStage); if(window.ResizeObserver) new ResizeObserver(()=>fitStage()).observe($('#stagewrap'));
 
 /* text and stickers */
 const STYLES={clean:{},box:{},neon:{},outline:{}};
@@ -301,12 +322,12 @@ function frame(now){
     const pc=prevInfo&&prevInfo.from, trans=pc?pc.trans:'none', p=pc?(Tcur-c.t0)/.5:1;
     const f=FILTERS[c.filter]||FILTERS.none, a=c.adj;
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
-    gl.uniform4fv(U.cropC,crop(m.el,c.zoom)); gl.uniform4fv(U.cropP,prevInfo?prevInfo.crop:[0,0,1,1]);
-    gl.uniform4f(U.adj,f[0]+a.b,f[1]*a.c,f[2]*a.s,f[3]+a.w); gl.uniform1f(U.grain,f[4]*.12); gl.uniform1f(U.t,now%1000);
+    const fx=capsFx(Tcur); gl.uniform4fv(U.cropC,crop(m.el,c.zoom*fx.punch)); gl.uniform4fv(U.duo,fx.duo); gl.uniform2fv(U.grade,fx.grade); gl.uniform4fv(U.cropP,prevInfo?prevInfo.crop:[0,0,1,1]);
+    gl.uniform4f(U.adj,f[0]+a.b,f[1]*a.c,f[2]*a.s,f[3]+a.w); gl.uniform1f(U.grain,f[4]*.12+fx.grain); gl.uniform1f(U.t,now%1000);
     gl.uniform1f(U.mode,{fade:1,slide:2,zoom:3,flash:4}[trans]||0); gl.uniform1f(U.p,Math.min(1,p)); gl.uniform1f(U.hasPrev,prevInfo&&trans!=='none'&&p<1?1:0);
     gl.drawArrays(gl.TRIANGLES,0,3);
   } else if(gl){ gl.clearColor(0,0,0,1); gl.clear(gl.COLOR_BUFFER_BIT); }
-  drawItems(Tcur);
+  drawItems(Tcur); drawCaps(Tcur);
   // music follows the timeline
   if(P.music&&P.music.el.readyState>=1){ const mu=P.music, want=Tcur-mu.at;
     if(mu.gain) mu.gain.gain.value=(playing&&want>=0&&want<mu.dur?mu.vol:0)*(mu.duck&&P.clips.some(c=>c.vol>0)?.35:1);
@@ -378,6 +399,7 @@ function renderPanel(){
       ${it&&it.type==='sticker'?`${sliderRow('isz',t('size'),.04,.25,.005,it.size,Math.round(it.size*100))}<div class="btns">${['none','pop','fade'].map(a=>`<button data-anim="${a}" class="${it.anim===a?'on':''}">${t('a'+a[0].toUpperCase()+a.slice(1))}</button>`).join('')}</div>${sliderRow('ist',t('from'),0,Math.max(.1,total),.05,it.start,fmt(it.start))}${sliderRow('ien',t('to'),0,Math.max(.1,total),.05,it.end,fmt(it.end))}<div class="btns"><button data-act="delItem" class="warn">🗑 ${t('delItem')}</button></div>`:''}`;
   else if(tab==='music') pn.innerHTML=`<p class="hint">${t('musicHint')}</p><div class="btns"><label class="pill file"><span>${t('pickMusic')}</span><input type="file" accept="audio/*" id="pickM"></label></div>
       ${P.music?`${sliderRow('mvol',t('musicVol'),0,1.5,.05,P.music.vol,Math.round(P.music.vol*100)+'%')}<label class="sl" style="grid-template-columns:1fr auto"><span>${t('duck')}</span><input type="checkbox" id="mduck"${P.music.duck?' checked':''}></label><div class="btns"><button data-act="delMusic" class="warn">🗑 ${t('removeMusic')}</button></div>`:''}`;
+  else if(tab==='style'||tab==='caps') capsPanel(pn,c);
   else if(tab==='format') pn.innerHTML=`<p class="hint">${t('formatHint')}</p><div class="btns">${Object.keys(ASPECTS).map(k=>`<button data-aspect="${k}" class="${P.aspect===k?'on':''}">${ASPECTS[k].join(':')}</button>`).join('')}</div><p class="hint">${t('fit')}</p>`;
 }
 function refresh(){ layout(); if(sel&&sel.kind==='clip'&&!selClip()) sel=null; if(sel&&sel.kind==='item'&&!selItem()) sel=null; renderTimeline(); renderPanel(); }
@@ -465,6 +487,255 @@ $('#exportGo').onclick=async()=>{
 };
 
 addEventListener('beforeunload',e=>{ if(P.clips.length){ e.preventDefault(); e.returnValue=t('leave'); } });
+/* ---------- caption styles: words that follow her voice, with their own doodles, zoom punches and colour ----------
+   Words live on the picked video (source time), so cutting, moving or speeding a clip carries its words along. */
+P.tpl='none'; P.capSize=1; P.capY=null;
+const TPL={
+  bubble:{name:'Bubble',per:2,size:.085,y:.7,font:fs=>`900 ${fs}px Nunito, system-ui, sans-serif`,upper:true,punch:1.08,grade:[1.15,.05],grain:0,sample:'POP IT',sampleCss:'font:900 19px Nunito;color:#fff;-webkit-text-stroke:1px #000',bg:'linear-gradient(135deg,#ff5d8f,#ffb347)'},
+  neon:{name:'Neon',per:4,size:.058,y:.74,font:fs=>`800 ${fs}px Nunito, system-ui, sans-serif`,upper:false,punch:1.04,grade:[.8,-.3],grain:0,sample:'glow up',sampleCss:'font:800 19px Nunito;color:#fff;text-shadow:0 0 6px #ff3df0,0 0 14px #ff3df0',bg:'linear-gradient(135deg,#1a0633,#05182e)'},
+  impact:{name:'Impact',per:1,size:.15,y:.5,font:fs=>`${fs}px Anton, Impact, sans-serif`,upper:true,punch:1.16,grade:[0,0],grain:.05,sample:'BOLD',sampleCss:'font:24px Anton,Impact;color:#ffe14a;letter-spacing:.02em',bg:'linear-gradient(135deg,#d0141e,#5a0408)'},
+  scribble:{name:'Scribble',per:3,size:.072,y:.72,font:fs=>`${fs}px "Permanent Marker", "Marker Felt", cursive`,upper:false,punch:1.06,grade:[.9,.12],grain:.035,sample:'Doodle',sampleCss:'font:20px "Permanent Marker","Marker Felt";color:#ffe14a',bg:'linear-gradient(135deg,#2b2b2b,#4a4a3a)'},
+  ember:{name:'Ember',per:4,size:.078,y:.74,font:fs=>`italic 700 ${fs}px "Cormorant Garamond", Georgia, serif`,upper:false,punch:1.05,grade:[1.05,.4],grain:.02,sample:'rise',sampleCss:'font:italic 700 24px "Cormorant Garamond",Georgia;color:#ffc864;text-shadow:0 0 10px #ff6a1a',bg:'linear-gradient(135deg,#2a0d05,#7a2a08)'}
+};
+['Anton','Permanent Marker','italic 700 1em "Cormorant Garamond"'].forEach(f=>{ try{ document.fonts.load(f.includes('em')?f:`40px "${f}"`); }catch(e){} });
+const hsh=n=>{ const x=Math.sin(n*127.1+311.7)*43758.5453; return x-Math.floor(x); };
+const easeBack=k=>1+2.70158*Math.pow(k-1,3)+1.70158*Math.pow(k-1,2);
+
+/* every caption word on the timeline, in order */
+function capWords(){ const out=[];
+  for(const c of P.clips){ const cap=media[c.mid]&&media[c.mid].cap; if(!cap||!cap.words.length) continue;
+    for(const w of cap.words){ if(w.e<=c.inS||w.s>=c.outS) continue; const s=Math.max(w.s,c.inS), e=Math.min(w.e,c.outS);
+      out.push({w,s:c.t0+(s-c.inS)/c.speed,e:c.t0+(e-c.inS)/c.speed,clip:c}); } }
+  return out; }
+/* short groups of words shown together */
+function capChunks(ws,tp){ const ch=[]; let cur=[];
+  const flush=()=>{ if(cur.length){ ch.push(cur); cur=[]; } };
+  ws.forEach((x,i)=>{ const prev=ws[i-1];
+    if(cur.length&&(x.s-prev.e>.5||prev.clip!==x.clip)) flush();
+    cur.push(x);
+    const chars=cur.reduce((a,y)=>a+y.w.w.length+1,0);
+    if(cur.length>=tp.per||/[.!?,;:…]$/.test(x.w.w)||chars>(tp.per>2?22:16)) flush(); });
+  flush();
+  ch.forEach((c,i)=>{ c.s=c[0].s; c.i=i; });
+  ch.forEach((c,i)=>{ const nx=ch[i+1]; c.end=Math.min(nx?nx.s:1e9,c[c.length-1].e+.45); });
+  return ch; }
+let capCache={key:'',ch:[]};
+function chunksNow(){ const tp=TPL[P.tpl]; if(!tp) return []; const ws=capWords();
+  const key=P.tpl+'|'+ws.map(x=>x.s.toFixed(3)+x.w.w+(x.w.key?1:0)).join(); if(key!==capCache.key) capCache={key,ch:capChunks(ws,tp)}; return capCache.ch; }
+function chunkAt(T){ return chunksNow().find(c=>T>=c.s&&T<c.end)||null; }
+function wordAt(ch,T){ if(!ch) return null; let w=null; for(const x of ch) if(T>=x.s) w=x; return w; }
+
+/* the picture side of a style: zoom punch on key words, the colour grade, a red flash for Impact */
+function capsFx(T){ const tp=TPL[P.tpl], fx={punch:1,duo:[0,0,0,0],grade:[1,0],grain:0}; if(!tp) return fx;
+  fx.grade=tp.grade.slice(); fx.grain=tp.grain;
+  const ch=chunkAt(T), w=wordAt(ch,T);
+  if(w&&w.w.key&&T<w.e+.15){ const a=Math.min(1,(T-w.s)/.14), b=Math.min(1,(w.e+.15-T)/.14), k=Math.min(a,b), e=k*k*(3-2*k);
+    fx.punch=1+(tp.punch-1)*e;
+    if(P.tpl==='impact') fx.duo=[.95,.06,.1,.88*e];
+    if(P.tpl==='neon') fx.grade[0]=.8+.5*e; }
+  return fx; }
+
+/* ---------- drawing the captions ---------- */
+function drawCaps(T){
+  const tp=TPL[P.tpl]; if(!tp) return; const W=ov.width, H=ov.height, x=ox;
+  if(P.tpl==='neon') neonFrame(T,W,H);
+  const ch=chunkAt(T);
+  if(P.tpl==='ember') embers(T,W,H,ch&&wordAt(ch,T)&&wordAt(ch,T).w.key);
+  if(!ch) return;
+  const fs=Math.round(tp.size*P.capSize*W), cy=(P.capY??tp.y)*H, cur=wordAt(ch,T);
+  x.save(); x.font=tp.font(fs); x.textAlign='left'; x.textBaseline='middle'; x.lineJoin='round';
+  const txt=w=>tp.upper?w.toUpperCase():w, sp=x.measureText(' ').width*(P.tpl==='bubble'?1.4:1);
+  // lay the words out in lines that fit
+  const maxW=W*.86, lines=[[]]; let lw=0;
+  for(const wd of ch){ const ww=x.measureText(txt(wd.w.w)).width+(wd.w.key&&P.tpl==='bubble'?fs*.5:0);
+    if(lines[lines.length-1].length&&lw+sp+ww>maxW){ lines.push([]); lw=0; }
+    lines[lines.length-1].push({wd,ww}); lw+=(lw?sp:0)+ww; }
+  const lh=fs*(P.tpl==='impact'?1.05:1.3), age=T-ch.s;
+  let yy=cy-(lines.length-1)*lh/2;
+  if(P.tpl==='ember'){ const k=Math.min(1,age/.35); yy+=(1-k)*fs*.5; x.globalAlpha=Math.min(k,Math.min(1,(ch.end-T)/.25)); }
+  for(const ln of lines){ const tw=ln.reduce((a,b)=>a+b.ww,0)+sp*(ln.length-1); let xx=W/2-tw/2;
+    for(const {wd,ww} of ln){ drawWord(tp,wd,txt(wd.w.w),xx,yy,ww,fs,T,wd===cur,ch); xx+=ww+sp; }
+    yy+=lh; }
+  x.restore();
+  if(P.tpl==='scribble'&&ch.i%3===0) arrow(T-ch.s,W,H,cy,fs,ch.i);
+}
+function drawWord(tp,wd,s,x0,y,ww,fs,T,isCur,ch){
+  const x=ox, k=wd.w.key, age=T-wd.s, said=T>=wd.s;
+  if(P.tpl==='bubble'){ if(!said) return; const q=Math.min(1,age/.18), sc=q<1?.4+.6*easeBack(q):1;
+    x.save(); x.translate(x0+ww/2,y); x.scale(sc,sc); x.translate(-ww/2,0);
+    if(k){ x.fillStyle='#ffd23f'; rr(x,-fs*.05,-fs*.62,ww+fs*.1,fs*1.2,fs*.28); x.fill(); x.fillStyle='#160a14'; x.fillText(s,fs*.2,fs*.04); stars(T,wd,x0,y,ww,fs); }
+    else{ x.lineWidth=fs*.16; x.strokeStyle='#000'; x.strokeText(s,0,0); x.fillStyle='#fff'; x.fillText(s,0,0); }
+    x.restore(); return; }
+  if(P.tpl==='neon'){ const col=k&&said?'#5dff9d':isCur?'#ff3df0':null;
+    x.save(); if(col){ x.shadowColor=col; x.shadowBlur=fs*.7; x.fillStyle=col; x.fillText(s,x0,y); x.shadowBlur=fs*.25; x.fillStyle='#fff'; x.fillText(s,x0,y); }
+    else{ x.shadowColor='rgba(0,0,0,.7)'; x.shadowBlur=fs*.2; x.fillStyle=said?'#fff':'rgba(255,255,255,.5)'; x.fillText(s,x0,y); }
+    x.restore(); return; }
+  if(P.tpl==='impact'){ if(!said) return; const q=Math.min(1,age/.12), sc=1.3-.3*q;
+    x.save(); x.translate(x0+ww/2,y); x.scale(sc,sc); x.shadowColor='rgba(0,0,0,.65)'; x.shadowBlur=fs*.25; x.shadowOffsetY=fs*.06;
+    x.fillStyle=k?'#ffe14a':'#fff'; x.fillText(s,-ww/2,0); x.restore(); return; }
+  if(P.tpl==='scribble'){ if(!said) return; const q=Math.min(1,age/.15), r=(hsh(wd.s*7)-.5)*.1;
+    x.save(); x.translate(x0+ww/2,y); x.rotate(r); x.globalAlpha*=q; x.lineWidth=fs*.14; x.strokeStyle='#111'; x.strokeText(s,-ww/2,0);
+    x.fillStyle=k?'#ffe14a':'#fff'; x.fillText(s,-ww/2,0);
+    if(k){ const d=Math.min(1,age/.35); x.strokeStyle='#ffe14a'; x.lineWidth=fs*.09; x.lineCap='round'; x.beginPath();
+      const n=24; for(let i=0;i<=n*d;i++){ const u=i/n, px=-ww/2-fs*.1+u*(ww+fs*.2), py=fs*.62+Math.sin(u*Math.PI*3)*fs*.07; i?x.lineTo(px,py):x.moveTo(px,py); } x.stroke();
+      if(d>=1){ x.globalAlpha*=.9; x.lineWidth=fs*.05; x.beginPath(); x.ellipse(0,0,ww/2+fs*.35,fs*.75,-.06,0,Math.PI*2*Math.min(1,(age-.35)/.3)); x.stroke(); } }
+    x.restore(); return; }
+  if(P.tpl==='ember'){ x.save();
+    if(k&&said){ const g=x.createLinearGradient(0,y-fs*.5,0,y+fs*.5); g.addColorStop(0,'#fff2b0'); g.addColorStop(.5,'#ffa030'); g.addColorStop(1,'#e2401a');
+      x.shadowColor='#ff6a1a'; x.shadowBlur=fs*.6*(.8+.2*Math.sin(T*9)); x.fillStyle=g; x.fillText(s,x0,y);
+      const d=Math.min(1,age/.4); x.shadowBlur=fs*.3; x.fillStyle='#ffb347'; x.fillRect(x0+ww*(1-d)/2,y+fs*.52,ww*d,Math.max(2,fs*.05)); }
+    else{ x.shadowColor='rgba(0,0,0,.7)'; x.shadowBlur=fs*.25; x.fillStyle=said?'#ffd58a':'rgba(255,222,170,.45)'; x.fillText(s,x0,y); }
+    x.restore(); }
+}
+/* doodles */
+function sparkle(x,y,r,rot,col){ const c=ox; c.save(); c.translate(x,y); c.rotate(rot); c.fillStyle=col; c.beginPath();
+  for(let i=0;i<8;i++){ const a=i*Math.PI/4, rr=i%2?r*.28:r; c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr); } c.closePath(); c.fill(); c.restore(); }
+function stars(T,wd,x0,y,ww,fs){ const cols=['#fff','#ff5d8f','#7cf5ff'], age=T-wd.s;
+  for(let i=0;i<3;i++){ const a=hsh(wd.s*13+i), side=i===1?-1:1, q=Math.min(1,Math.max(0,(age-.08*i)/.25));
+    const px=ww/2+side*(ww/2+fs*(.35+.3*a)), py=(i===2?.7:-.7)*fs*(.6+.4*a), r=fs*(.22+.12*a)*easeBack(q)*(1+.12*Math.sin(T*6+i));
+    if(q>0) sparkle(px,py,r,T*1.5*(i%2?1:-1),cols[i]); } }
+function neonFrame(T,W,H){ const c=ox, m=W*.045, hue=(T*40)%360; c.save(); c.lineWidth=W*.009; c.lineJoin='round';
+  c.setLineDash([W*.12,W*.05]); c.lineDashOffset=-T*W*.25;
+  for(const [col,blur] of [[`hsl(${hue},100%,62%)`,W*.03],['#fff',W*.008]]){ c.strokeStyle=col; c.shadowColor=`hsl(${hue},100%,60%)`; c.shadowBlur=blur; rr(c,m,m,W-2*m,H-2*m,W*.06); c.stroke(); }
+  c.setLineDash([]); c.strokeStyle=`hsl(${(hue+150)%360},100%,65%)`; c.shadowColor=c.strokeStyle; c.shadowBlur=W*.03; c.beginPath();
+  for(let i=0;i<=6;i++){ const px=W*.36+i*W*.047, py=m*2.3+(i%2?-1:1)*W*.018; i?c.lineTo(px,py):c.moveTo(px,py); } c.stroke(); c.restore(); }
+function embers(T,W,H,hot){ const c=ox; c.save(); c.globalCompositeOperation='lighter';
+  for(let i=0;i<34;i++){ const sp=.06+.08*hsh(i*3.1), ph=(T*sp+hsh(i))%1, px=W*(hsh(i*7.7)+.04*Math.sin(T*1.3+i)), py=H*(1.05-ph*1.15), r=W*(.003+.005*hsh(i*1.9))*(hot?1.6:1);
+    const a=Math.sin(ph*Math.PI)*(hot?1:.7); const g=c.createRadialGradient(px,py,0,px,py,r*4); g.addColorStop(0,`rgba(255,220,140,${a})`); g.addColorStop(.3,`rgba(255,120,30,${a*.6})`); g.addColorStop(1,'rgba(255,60,0,0)');
+    c.fillStyle=g; c.beginPath(); c.arc(px,py,r*4,0,7); c.fill(); }
+  c.restore(); }
+function arrow(age,W,H,cy,fs,seed){ if(age<0||age>2.2) return; const c=ox, d=Math.min(1,age/.35), left=seed%2===0, sx=left?W*.1:W*.9, sy=cy-fs*2.4, ex=left?W*.2:W*.8, ey=cy-fs*.9;
+  c.save(); c.strokeStyle='#fff'; c.lineWidth=fs*.08; c.lineCap='round'; c.shadowColor='rgba(0,0,0,.5)'; c.shadowBlur=fs*.1; c.beginPath();
+  const n=20, pt=u=>[sx+(ex-sx)*u+(left?-1:1)*Math.sin(u*Math.PI)*fs*.8, sy+(ey-sy)*u];
+  for(let i=0;i<=n*d;i++){ const [px,py]=pt(i/n); i?c.lineTo(px,py):c.moveTo(px,py); } c.stroke();
+  if(d>=1){ const [ax,ay]=pt(1), [bx,by]=pt(.92), an=Math.atan2(ay-by,ax-bx); c.beginPath();
+    for(const s of [-1,1]){ c.moveTo(ax,ay); c.lineTo(ax-Math.cos(an+s*.5)*fs*.45,ay-Math.sin(an+s*.5)*fs*.45); } c.stroke(); }
+  c.restore(); }
+
+/* ---------- matching words to the voice ---------- */
+async function decodeMedia(m){ if(m.pcm) return m.pcm; ensureAC();
+  const ab=await (await fetch(m.el.src)).arrayBuffer();
+  const buf=await new Promise((ok,bad)=>{ const p=AC.decodeAudioData(ab,ok,bad); if(p&&p.then) p.then(ok,bad); });
+  const n=buf.length, d=new Float32Array(n); for(let ch=0;ch<buf.numberOfChannels;ch++){ const s=buf.getChannelData(ch); for(let i=0;i<n;i++) d[i]+=s[i]/buf.numberOfChannels; }
+  return m.pcm={d,rate:buf.sampleRate}; }
+/* where in the video someone is speaking: loudness against the background level */
+function voiceSegs(pcm){ const hop=Math.round(pcm.rate*.02), n=Math.floor(pcm.d.length/hop), db=new Float32Array(n);
+  for(let i=0;i<n;i++){ let s=0; for(let j=i*hop;j<(i+1)*hop;j++) s+=pcm.d[j]*pcm.d[j]; db[i]=10*Math.log10(s/hop+1e-10); }
+  const sm=db.map((v,i)=>(db[Math.max(0,i-1)]+v+db[Math.min(n-1,i+1)])/3), so=[...sm].sort((a,b)=>a-b), lo=so[Math.floor(n*.15)]||-80, hi=so[Math.floor(n*.97)]||0;
+  const thr=lo+Math.max(6,(hi-lo)*.3), segs=[]; let st=-1;
+  for(let i=0;i<=n;i++){ const on=i<n&&sm[i]>thr; if(on&&st<0) st=i; if(!on&&st>=0){ segs.push([st*.02,i*.02]); st=-1; } }
+  const merged=[]; for(const s of segs){ const l=merged[merged.length-1]; if(l&&s[0]-l[1]<.22) l[1]=s[1]; else merged.push(s.slice()); }
+  const out=merged.filter(s=>s[1]-s[0]>.1).map(s=>[Math.max(0,s[0]-.04),s[1]+.04]);
+  // where a new word likely begins: speech starting, or a dip in loudness inside speech
+  const on=[]; for(let i=1;i<n-1;i++){ if(sm[i]>thr&&sm[i-1]<=thr){ on.push(Math.max(0,i*.02-.03)); continue; }
+    if(sm[i]<=sm[i-1]&&sm[i]<sm[i+1]&&sm[i]>thr-8){ let l=-1e9,r=-1e9; for(let j=Math.max(0,i-6);j<i;j++) l=Math.max(l,sm[j]); for(let j=i+1;j<Math.min(n,i+7);j++) r=Math.max(r,sm[j]);
+      if(Math.min(l,r)-sm[i]>4.5) on.push(i*.02); } }
+  out.onsets=on; return out; }
+/* move each word start to the nearest likely word beginning, keeping the order */
+function snapWords(words,segs){ const on=segs.onsets||[]; if(!on.length) return; let last=-1;
+  words.forEach((w,i)=>{ let best=null, bd=.3; for(const o of on){ const d=Math.abs(o-w.s); if(d<bd&&o>last+.06){ bd=d; best=o; } }
+    if(best!=null&&!w.fix){ const sh=best-w.s; w.s=best; w.e=Math.max(w.s+.08,w.e+sh*.5); } last=w.s; });
+  words.forEach((w,i)=>{ const nx=words[i+1]; if(nx&&w.e>nx.s) w.e=Math.max(w.s+.06,nx.s-.01); }); }
+const syl=w=>Math.max(1,(w.toLowerCase().match(/[aeiouyаеєиіїоуюяёыэ]+/g)||[]).length);
+/* spread words over the speech between a and b, longer words taking longer */
+function spread(words,segs,a,b){ const sg=segs.map(s=>[Math.max(a,s[0]),Math.min(b,s[1])]).filter(s=>s[1]-s[0]>.02);
+  if(!sg.length) sg.push([a,b]); const V=sg.reduce((t,s)=>t+s[1]-s[0],0), wt=words.map(w=>syl(w.w)+.3), Wt=wt.reduce((x,y)=>x+y,0);
+  const at=f=>{ let r=f*V; for(const s of sg){ const L=s[1]-s[0]; if(r<=L) return s[0]+r; r-=L; } return sg[sg.length-1][1]; };
+  let acc=0; words.forEach((w,i)=>{ w.s=at(acc/Wt); acc+=wt[i]; w.e=Math.max(w.s+.08,at(acc/Wt-.02/Math.max(1,V))); }); }
+/* sentences start after pauses: pin the word after punctuation to the nearest start of speech, then spread the parts between */
+function spreadSmart(words,segs,a,b){ spread(words,segs,a,b);
+  const starts=segs.map(s=>s[0]).filter(x=>x>a+.05&&x<b-.05), pins=[]; let last=a;
+  words.forEach((w,i)=>{ if(!i||!/[.!?…,;:]$/.test(words[i-1].w)) return; let best=null, bd=1.2;
+    for(const x of starts){ const d=Math.abs(x-w.s); if(d<bd&&x>last+.1){ bd=d; best=x; } } if(best!=null){ pins.push([i,best]); last=best; } });
+  if(!pins.length) return; const bounds=[[0,a],...pins,[words.length,b]];
+  for(let k=0;k<bounds.length-1;k++){ const [i0,t0]=bounds[k], [i1,t1]=bounds[k+1]; if(i1>i0) spread(words.slice(i0,i1),segs,t0,t1); } }
+const STOP=new Set('the and that this with have from your what when they them then than just like about there their would could should because really very into been were will more some only also over such which while where after before being these those other thing things going doing gonna wanna себе тому тоді коли який яка яке які щоб також дуже може треба потім тільки зараз наші ваші свою своє цього цієї цьому'.split(' '));
+function autoKeys(words){ let best=null; words.forEach((w,i)=>{ const c=w.w.replace(/[^\p{L}\p{N}']/gu,''); if(c.length>=5&&!STOP.has(c.toLowerCase())&&(!best||c.length>best.c)) best={i,c:c.length};
+  if(/[.!?…]$/.test(w.w)||i===words.length-1){ if(best) words[best.i].key=true; best=null; } }); }
+function toWords(text){ return text.replace(/\s+/g,' ').trim().split(' ').filter(Boolean).map(w=>({w,s:0,e:0,key:false})); }
+async function matchText(m,text){ const pcm=await decodeMedia(m), segs=voiceSegs(pcm), words=toWords(text); if(!words.length) return 0;
+  if(!segs.length) throw new Error('novoice');
+  spreadSmart(words,segs,segs[0][0],segs[segs.length-1][1]); snapWords(words,segs); autoKeys(words); m.cap={text,words,segs}; return words.length; }
+/* Gemini hears the speech in phrases with times; inside each phrase the words follow the loudness */
+function wavB64(pcm){ const R=16000, n=Math.floor(pcm.d.length*R/pcm.rate), b=new ArrayBuffer(44+n*2), v=new DataView(b);
+  const ws=(o,s)=>{ for(let i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i)); };
+  ws(0,'RIFF'); v.setUint32(4,36+n*2,true); ws(8,'WAVE'); ws(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,R,true); v.setUint32(28,R*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); ws(36,'data'); v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){ const x=pcm.d[Math.min(pcm.d.length-1,Math.floor(i*pcm.rate/R))]; v.setInt16(44+i*2,Math.max(-1,Math.min(1,x))*32767,true); }
+  const u=new Uint8Array(b); let s=''; for(let i=0;i<u.length;i+=32768) s+=String.fromCharCode.apply(null,u.subarray(i,i+32768)); return btoa(s); }
+async function hearWords(m){ const key=SFkey(); if(!key) throw new Error('nokey'); const pcm=await decodeMedia(m), segs=voiceSegs(pcm); if(!segs.length) throw new Error('novoice');
+  const body={contents:[{role:'user',parts:[{inlineData:{mimeType:'audio/wav',data:wavB64(pcm)}},{text:'Transcribe the speech in this audio exactly as spoken, in its own language, with punctuation. Split it into short phrases of 2 to 8 words. Reply with only a JSON array: [{"s":start_seconds,"e":end_seconds,"t":"phrase text"}].'}]}],generationConfig:{responseMimeType:'application/json',temperature:0}};
+  let j=null;
+  for(const mdl of ['gemini-flash-latest','gemini-2.5-flash']){ const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mdl}:generateContent`,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':key},body:JSON.stringify(body)});
+    j=await r.json().catch(()=>({})); if(r.ok) break; if(r.status===404) continue; throw new Error(r.status===429?'busy (try again in a minute)':(j.error&&j.error.message)||('HTTP '+r.status)); }
+  const txt=((j.candidates||[])[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
+  let ph=JSON.parse(txt.replace(/^```(json)?|```$/g,'').trim()); if(!Array.isArray(ph)||!ph.length) throw new Error('no words');
+  const words=[], end=pcm.d.length/pcm.rate;
+  ph.forEach((p,i)=>{ const w=toWords(String(p.t||'')); if(!w.length) return; let a=+p.s||0, b=+p.e||a+w.length*.35; a=Math.max(0,Math.min(end,a)); b=Math.max(a+.1,Math.min(end,b));
+    // snap the phrase to the speech it overlaps
+    const ov=segs.filter(s=>s[1]>a-.25&&s[0]<b+.25); if(ov.length){ a=Math.max(a-.25,ov[0][0]); b=Math.min(b+.25,ov[ov.length-1][1]); }
+    spreadSmart(w,segs,a,b); words.push(...w); });
+  snapWords(words,segs);
+  for(let i=1;i<words.length;i++) if(words[i].s<words[i-1].s+.04){ words[i].s=words[i-1].s+.04; words[i].e=Math.max(words[i].e,words[i].s+.08); }
+  autoKeys(words); m.cap={text:words.map(w=>w.w).join(' '),words,segs}; return words.length; }
+function SFkey(){ try{ return JSON.parse(localStorage.getItem('sf.gkey')||'""'); }catch(e){ return ''; } }
+function SFscripts(){ try{ return (JSON.parse(localStorage.getItem('sf.scripts')||'[]')||[]).filter(s=>s&&s.text&&s.text.trim()); }catch(e){ return []; } }
+/* she says when a word really starts; the words around it re-spread up to the neighbouring fixed words */
+function anchorWord(m,i,s){ const ws=m.cap.words; ws[i].s=s; ws[i].fix=true; const segs=m.cap.segs||[];
+  let a=i-1; while(a>=0&&!ws[a].fix) a--; let b=i+1; while(b<ws.length&&!ws[b].fix) b++;
+  const from=a>=0?ws[a].s:Math.min(s,(segs[0]||[0])[0]), to=b<ws.length?ws[b].s:Math.max(s+.1,(segs[segs.length-1]||[0,s+1])[1]);
+  if(i-a-1>0){ const fixA=a>=0?ws[a]:null; const part=ws.slice(a+1,i); spread(fixA?[fixA,...part]:part,segs,from,s); if(fixA) fixA.s=from; }
+  spread(ws.slice(i,b),segs,s,to); ws[i].s=s; }
+
+/* ---------- panels ---------- */
+let capWord=-1, capBusy='';
+function capsPanel(pn,c){
+  if(tab==='style'){ const hasWords=capWords().length>0;
+    pn.innerHTML=`<p class="hint">${t('stHint')}</p><div class="tpls">${['none',...Object.keys(TPL)].map(k=>{ const tp=TPL[k];
+      return `<button data-tpl="${k}" class="tpl${P.tpl===k?' on':''}" style="background:${tp?tp.bg:'var(--panel2)'}"><span style="${tp?tp.sampleCss:'font:800 15px Nunito;color:var(--muted)'}">${tp?tp.sample:'—'}</span><b>${tp?tp.name:t('stNone')}</b></button>`; }).join('')}</div>
+      ${P.tpl!=='none'?(hasWords?'':`<p class="hint">${t('needWords')}</p>`)+sliderRow('csz',t('capSize'),.6,1.6,.02,P.capSize,Math.round(P.capSize*100)+'%')+sliderRow('cy',t('capY'),.12,.9,.01,P.capY??TPL[P.tpl].y,Math.round((P.capY??TPL[P.tpl].y)*100)+'%'):''}`;
+    return; }
+  if(!c){ pn.innerHTML=`<p class="hint">${t('pickClip')}</p>`; return; }
+  const m=mediaFor(c), cap=m.cap, scr=SFscripts();
+  const cw=cap&&wordAt(chunkAt(Tcur),Tcur);
+  pn.innerHTML=`<div class="sub">${t('capsFor')}</div>
+    ${capBusy?`<p class="hint">${esc(capBusy)}</p>`:''}
+    ${cap?`<div class="words">${cap.words.map((w,i)=>`<button data-w="${i}" class="${i===capWord?'on':''}${w.key?' key':''}${cw&&cw.w===w?' now':''}">${esc(w.w)}</button>`).join('')}</div>
+      ${capWord>=0&&cap.words[capWord]?`<div class="btns"><input type="text" id="wordEd" value="${esc(cap.words[capWord].w)}" placeholder="${t('wordPh')}" style="flex:1;min-width:120px"><button data-act="anchor">${t('startsHere')}</button><button data-act="key" class="${cap.words[capWord].key?'on':''}">${t('keyWord')}</button></div>`:''}
+      <div class="btns"><button data-act="capsClear" class="warn">🗑 ${t('clearCaps')}</button></div>`
+    :`<p class="hint">${t('capsHint')}</p>
+      <div class="btns"><button class="pill" data-act="hear"${capBusy?' disabled':''}>${t('hear')}</button></div>
+      ${SFkey()?'':`<p class="hint">${t('hearNo')} <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--gold)">aistudio.google.com/apikey</a></p><input type="text" id="gkey" placeholder="Gemini key" autocomplete="off" autocapitalize="off" spellcheck="false">`}
+      ${scr.length?`<select id="scrPick" style="background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px"><option value="">${t('fromScript')}…</option>${scr.map((s,i)=>`<option value="${i}">${esc((s.title||s.text).slice(0,40))}</option>`).join('')}</select>`:''}
+      <textarea id="capText" rows="3" placeholder="${t('typePh')}" style="background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;resize:vertical"></textarea>
+      <div class="btns"><button data-act="matchText"${capBusy?' disabled':''}>${t('match')}</button></div>`}`;
+}
+async function capRun(c,fn,label){ const m=mediaFor(c); capBusy=label; renderPanel();
+  try{ const n=await fn(m); capBusy=t('matched').replace('{n}',n); if(P.tpl==='none') P.tpl='bubble'; capWord=-1; }
+  catch(err){ capBusy=err.message==='novoice'?t('noVoice'):err.message==='nokey'?t('hearNo'):t('hearFail')+err.message; }
+  refresh(); }
+$('#panel').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b||!(tab==='style'||tab==='caps')) return; const c=selClip(), d=b.dataset;
+  if(d.tpl){ P.tpl=d.tpl; P.capY=null; refresh(); if(!playing){ const ch=chunksNow()[0]; if(ch&&(Tcur<ch.s-.1||!chunkAt(Tcur))) seek(ch.s); } e.stopImmediatePropagation(); return; }
+  if(!c) return; const m=mediaFor(c);
+  if(d.act==='hear'){ capRun(c,hearWords,t('listening')); }
+  else if(d.act==='matchText'){ const tx=$('#capText').value.trim(); if(tx) capRun(c,mm=>matchText(mm,tx),t('matching')); }
+  else if(d.w!=null){ capWord=+d.w; const w=m.cap.words[capWord]; const T=c.t0+(w.s-c.inS)/c.speed; if(w.s>=c.inS&&w.s<c.outS) seek(T); refresh(); }
+  else if(d.act==='anchor'&&capWord>=0){ const s=c.inS+(Tcur-c.t0)*c.speed; anchorWord(m,capWord,s); refresh(); }
+  else if(d.act==='key'&&capWord>=0){ m.cap.words[capWord].key=!m.cap.words[capWord].key; refresh(); }
+  else if(d.act==='capsClear'){ m.cap=null; capWord=-1; capBusy=''; refresh(); }
+  else return;
+  e.stopImmediatePropagation();
+},true);
+$('#panel').addEventListener('input',e=>{ const el=e.target, v=+el.value, o=$('#'+el.id+'O');
+  if(el.id==='csz'){ P.capSize=v; o.textContent=Math.round(v*100)+'%'; }
+  if(el.id==='cy'){ P.capY=v; o.textContent=Math.round(v*100)+'%'; }
+  if(el.id==='wordEd'){ const c=selClip(); if(c&&mediaFor(c).cap&&capWord>=0){ mediaFor(c).cap.words[capWord].w=el.value||'…'; const bt=$(`[data-w="${capWord}"]`); if(bt) bt.textContent=el.value; } }
+});
+$('#panel').addEventListener('change',e=>{ if(e.target.id==='gkey'&&e.target.value.trim()){ try{ localStorage.setItem('sf.gkey',JSON.stringify(e.target.value.trim())); }catch(_){} renderPanel(); } if(e.target.id==='scrPick'&&e.target.value!==''){ const s=SFscripts()[+e.target.value]; if(s) $('#capText').value=s.text; } });
+/* keep the word list showing which word is being said */
+setInterval(()=>{ if(tab!=='caps') return; const c=selClip(); if(!c||!mediaFor(c).cap) return; const cw=wordAt(chunkAt(Tcur),Tcur);
+  document.querySelectorAll('.words [data-w]').forEach(b=>{ const on=cw&&mediaFor(c).cap.words[+b.dataset.w]===cw.w; b.classList.toggle('now',!!on); if(on&&playing) b.scrollIntoView({block:'nearest',inline:'nearest'}); }); },150);
+
 sizeCanvases(); refresh();
 </script>
 </body></html>
