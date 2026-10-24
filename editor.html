@@ -42,9 +42,14 @@ button{cursor:pointer}
 /* timeline */
 .tl{position:relative;overflow-x:auto;overflow-y:hidden;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 0;scrollbar-width:none;touch-action:pan-x}
 .tl::-webkit-scrollbar{display:none}
-.tlin{position:relative;height:142px;margin:0 50%}
-.row{position:absolute;left:0;height:44px}
-.row.ov{top:50px;height:26px}.row.mu{top:82px;height:26px}.row.fx{top:114px;height:24px}
+.tlin{position:relative;height:104px;margin:0 50%}
+.row{position:absolute;left:0;height:38px}
+.row.ov{top:42px;height:20px}.row.mu{top:64px;height:18px}.row.fx{top:84px;height:20px}
+.row.ov .bar,.row.mu .bar{padding:1px 6px;font-size:10.5px}
+.bar.fxb{height:9px!important}.bar.fxb.cut{top:11px!important}
+.tl{padding:6px 0!important}
+.app.big .tl,.app.big .tabs,.app.big .panel{display:none}
+.panel.shut{display:none}
 .bar.fxb{height:11px;padding:0 6px;font-size:9px;line-height:9px;background:color-mix(in srgb,#b48cff 45%,var(--panel2))}.bar.fxb.cut{top:13px;background:color-mix(in srgb,#5dd6a0 45%,var(--panel2))}
 .blk{position:absolute;top:0;height:100%;border-radius:8px;border:2px solid transparent;overflow:hidden;background:var(--panel2) center/auto 100% repeat-x;display:flex;align-items:flex-end;padding:2px 5px;font-size:10.5px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap}
 .blk.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
@@ -62,7 +67,7 @@ button{cursor:pointer}
 .tabs button{flex:none;border:0;background:none;color:var(--muted);font-weight:800;font-size:12.5px;padding:8px 10px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px}
 .tabs button i{font-style:normal;font-size:18px}
 .tabs button[aria-pressed=true]{background:var(--panel2);color:var(--fg)}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:120px;max-height:34vh;overflow-y:auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0;max-height:30vh;overflow-y:auto}
 .panel .hint{margin:0;color:var(--muted);font-size:13px}
 .btns{display:flex;flex-wrap:wrap;gap:8px}
 .btns button,.chip{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:9px 12px;font-weight:800;font-size:13px}
@@ -109,6 +114,7 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
   <div class="transport">
     <button class="round play" id="playBtn" aria-label="Play">▶</button>
     <span class="time" id="time">0:00.0 / 0:00.0</span>
+    <button class="round" id="bigBtn" aria-label="Bigger video" title="Bigger video">⤢</button>
     <button class="round" id="undoBtn" aria-label="Undo" title="Undo" disabled>↶</button>
   </div>
 
@@ -357,7 +363,7 @@ function frame(now){
       if(exporting){ const d=src-m.el.currentTime; if(Math.abs(d)>.6&&!m.el.seeking) m.el.currentTime=src; else m.el.playbackRate=c.speed*Math.min(1.12,Math.max(.88,1+d*.8)); }   // catch up gently
       else if(m.el.playbackRate!==c.speed) m.el.playbackRate=c.speed; }
     else if(!m.el.seeking&&Math.abs(m.el.currentTime-src)>.03) m.el.currentTime=src;
-    upload(texCur,0,m.el);
+    if(!(cutWanted(Tcur)&&segStep(m.el))) upload(texCur,0,m.el);
     const pc=prevInfo&&prevInfo.from, trans=pc?pc.trans:'none', p=pc?(Tcur-c.t0)/.5:1;
     const f=FILTERS[c.filter]||FILTERS.none, a=c.adj;
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
@@ -419,7 +425,7 @@ $('#stage').addEventListener('pointerup',()=>{ drag=null; });
 /* ---------- tool panels ---------- */
 const sliderRow=(id,label,min,max,step,val,out)=>`<label class="sl"><span>${label}</span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"><output id="${id}O">${out}</output></label>`;
 function renderPanel(){
-  const pn=$('#panel'), c=selClip(), it=selItem();
+  const pn=$('#panel'), c=selClip(), it=selItem(); if(tab!==renderPanel.last){ pn.classList.remove('shut'); renderPanel.last=tab; }
   document.querySelectorAll('#tabs [data-tab]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tab===tab));
   const needClip=`<p class="hint">${t('pickClip')}</p>`;
   if(tab==='add') pn.innerHTML=`<p class="hint">${t('addHint')}</p><div class="btns"><label class="pill file"><span>${t('addMore')}</span><input type="file" accept="video/*" multiple id="pick1"></label></div>`;
@@ -449,7 +455,10 @@ function renderPanel(){
   else if(tab==='format') pn.innerHTML=`<p class="hint">${t('formatHint')}</p><div class="btns">${Object.keys(ASPECTS).map(k=>`<button data-aspect="${k}" class="${P.aspect===k?'on':''}">${ASPECTS[k].join(':')}</button>`).join('')}</div><p class="hint">${t('fit')}</p>`;
 }
 function refresh(){ layout(); if(sel&&sel.kind==='clip'&&!selClip()) sel=null; if(sel&&sel.kind==='item'&&!selItem()) sel=null; renderTimeline(); renderPanel(); }
-$('#tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; tab=b.dataset.tab;
+$('#bigBtn').onclick=()=>{ const big=$('.app').classList.toggle('big'); $('#bigBtn').textContent=big?'⤡':'⤢'; };
+$('#tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return;
+  if(tab===b.dataset.tab){ $('#panel').classList.toggle('shut'); return; }   // tapping the open tab folds its settings away
+  $('#panel').classList.remove('shut'); tab=b.dataset.tab;
   if(['edit','speed','look','trans'].includes(tab)&&!selClip()&&P.clips.length){ const i=clipAt(Tcur); sel={kind:'clip',id:P.clips[i].id}; }
   refresh(); });
 $('#undoBtn').onclick=undo;
@@ -849,19 +858,29 @@ async function segLoad(){ if(SEG.state==='loading'||SEG.state==='ready') return;
   catch(e){ SEG.state='fail'; SEG.err=(e&&e.message)||String(e); console.error(e); }
   renderPanel(); }
 /* one mask per video frame; when paused on the same frame the last one is kept */
-function segRun(el){ if(SEG.state!=='ready'||el.readyState<2||!el.videoWidth) return !!SEG.mask&&SEG.el===el;
-  if(SEG.el===el&&SEG.at===el.currentTime&&SEG.mask) return true;
-  if(playing&&!exporting&&SEG.el===el&&SEG.mask&&performance.now()-SEG.last<Math.min(150,SEG.cost*1.5)) return true;
-  const st=performance.now();
-  const ts=SEG.ts=Math.max(SEG.ts+1,Math.round(performance.now()));
-  try{ SEG.seg.segmentForVideo(el,ts,r=>{ const mk=r.confidenceMasks&&r.confidenceMasks[0]; if(!mk) return; const f=mk.getAsFloat32Array(), w=mk.width, h=mk.height;
-      if(!SEG.mask||SEG.w!==w||SEG.h!==h){ SEG.mask=new Uint8Array(w*h); SEG.w=w; SEG.h=h; SEG.el=null; }
-      const a=SEG.mask, k=SEG.el===el&&playing?.7:1; for(let i=0;i<a.length;i++) a[i]=a[i]*(1-k)+f[i]*255*k; }); }
+/* one snapshot of the video frame feeds both the picture and the cutout, so the cut always matches her.
+   When the phone is busy the preview holds that frame a moment rather than letting the cut fall behind. */
+const frameCv=document.createElement('canvas'), fx2=frameCv.getContext('2d'), segCv=document.createElement('canvas'), sx2=segCv.getContext('2d');
+function segStep(el){ if(SEG.state!=='ready'||el.readyState<2||!el.videoWidth) return false;
+  const now=performance.now(), same=SEG.el===el&&SEG.mask;
+  if(same&&el.seeking) return 'held';
+  if(same&&el.paused&&SEG.at===el.currentTime&&now-SEG.last<250) return 'held';
+  if(same&&playing&&!exporting&&now-SEG.last<Math.min(150,SEG.cost*1.5)) return 'held';
+  const vw=el.videoWidth, vh=el.videoHeight, k=Math.min(1,1920/Math.max(vw,vh)), W=Math.round(vw*k), H=Math.round(vh*k);
+  if(frameCv.width!==W||frameCv.height!==H){ frameCv.width=W; frameCv.height=H; }
+  const sw=256, sh=Math.round(256*vh/vw); if(segCv.width!==sw||segCv.height!==sh){ segCv.width=sw; segCv.height=sh; }
+  fx2.drawImage(el,0,0,W,H); sx2.drawImage(frameCv,0,0,sw,sh);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,texCur); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,frameCv);
+  const ts=SEG.ts=Math.max(SEG.ts+1,Math.round(now));
+  try{ SEG.seg.segmentForVideo(segCv,ts,r=>{ const mk=r.confidenceMasks&&r.confidenceMasks[0]; if(!mk) return; const f=mk.getAsFloat32Array(), w=mk.width, h=mk.height;
+      const fresh=!SEG.mask||SEG.w!==w||SEG.h!==h||SEG.el!==el; if(fresh){ SEG.mask=new Uint8Array(w*h); SEG.w=w; SEG.h=h; }
+      const a=SEG.mask, q=fresh||!playing?1:.85; for(let i=0;i<a.length;i++) a[i]=a[i]*(1-q)+f[i]*255*q; }); }
   catch(e){ console.error(e); return false; }
-  SEG.el=el; SEG.at=el.currentTime; SEG.last=performance.now(); SEG.cost=SEG.cost*.8+(SEG.last-st)*.2;
+  SEG.el=el; SEG.at=el.currentTime; SEG.last=performance.now(); SEG.cost=SEG.cost*.8+(SEG.last-now)*.2;
   gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D,texMask); gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,SEG.w,SEG.h,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,SEG.mask); gl.pixelStorei(gl.UNPACK_ALIGNMENT,4);
-  return true; }
+  return 'fresh'; }
+function cutWanted(T){ return SEG.state==='ready'&&cutActive()&&rangeAmt('cut',T)>0; }
 /* background pictures */
 const bgPic={key:'',img:null,ready:false};
 function useBgPic(key,src){ if(bgPic.key===key) return; bgPic.key=key; bgPic.ready=false; const im=new Image();
@@ -921,7 +940,7 @@ function refineMask(cropC){
   gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D,PASS.tSoft.tx);
   gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.useProgram(prog); gl.viewport(0,0,W,H); const a=gl.getAttribLocation(prog,'a'); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0); gl.enableVertexAttribArray(a); }
 let segLive=false;
-function cutUniforms(el,T,cropC){ const amt=cutActive()?rangeAmt('cut',T):0, on=amt>0&&segRun(el); gl.uniform1f(U.cutAmt,amt); segLive=on; gl.uniform1f(U.seg,on?1:0); if(!on) return;
+function cutUniforms(el,T,cropC){ const amt=cutActive()?rangeAmt('cut',T):0, on=amt>0&&SEG.state==='ready'&&!!SEG.mask&&SEG.el===el; gl.uniform1f(U.cutAmt,amt); segLive=on; gl.uniform1f(U.seg,on?1:0); if(!on) return;
   refineMask(cropC);
   const c=P.cut, bgm={none:0,blur:1,dark:2,colour:3}[c.bg]; let mode=bgm;
   if(mode===undefined){ if(BG_PICS[c.bg]) useBgPic(c.bg,BG_PICS[c.bg]); else if(c.bg==='photo'&&c.photo) useBgPic('photo:'+c.photo,c.photo);
