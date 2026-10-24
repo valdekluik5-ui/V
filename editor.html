@@ -292,7 +292,7 @@ function crop(el,zoom){ const vw=el.videoWidth||9, vh=el.videoHeight||16, [aw,ah
 let prevInfo=null;   // the outgoing clip's last frame, for transitions
 function upload(tex,unit,el){ if(!el||el.readyState<2) return false; gl.activeTexture(gl.TEXTURE0+unit); gl.bindTexture(gl.TEXTURE_2D,tex);
   try{ gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,el); return true; }catch(e){ return false; } }
-function sizeCanvases(full){ const [aw,ah]=ASPECTS[P.aspect], long=full||(window.devicePixelRatio>1?1080:720), w=aw>ah?long:Math.round(long*aw/ah), h=aw>ah?Math.round(long*ah/aw):long;
+function sizeCanvases(full){ const [aw,ah]=ASPECTS[P.aspect], long=full||720, w=aw>ah?long:Math.round(long*aw/ah), h=aw>ah?Math.round(long*ah/aw):long;
   const W=Math.round(w/2)*2, H=Math.round(h/2)*2; for(const c of [$('#gl'),ov]) if(c.width!==W||c.height!==H){ c.width=W; c.height=H; }
   $('#stage').style.aspectRatio=aw+'/'+ah; fitStage(); }
 function fitStage(){ const w=$('#stagewrap'), [aw,ah]=ASPECTS[P.aspect], ar=aw/ah, W=w.clientWidth, H=w.clientHeight; const s=$('#stage');
@@ -334,7 +334,15 @@ function pause(){ playing=false; $('#playBtn').textContent='▶'; for(const m of
 $('#playBtn').onclick=()=>playing?pause():play();
 function frame(now){
   requestAnimationFrame(frame); layout();
-  if(playing){ Tcur=Math.min(total,exporting&&exporting.clock?Math.max(0,exporting.clock()):T0+(now-now0)/1000); if(Tcur>=total){ pause(); Tcur=total; if(exporting) exporting.finish(); } }
+  /* while playing, the video itself keeps the time (pushing it to a clock made iPhone stop and start); saving follows the sound's clock */
+  if(playing){
+    if(exporting&&exporting.clock) Tcur=Math.min(total,Math.max(0,exporting.clock()));
+    else { const pc=curIdx>=0?P.clips[curIdx]:null, pm=pc&&mediaFor(pc);
+      if(pm&&(pm.el.ended||!pm.el.paused&&!pm.el.seeking&&pm.el.readyState>=2)){ const v=pm.el.currentTime;
+        let T=pc.t0+(v-pc.inS)/pc.speed; if(v>=pc.outS-.02||pm.el.ended) T=pc.t0+pc.len+1e-3;
+        if(T>Tcur+1e-4){ Tcur=Math.min(total,T); T0=Tcur; now0=now; } else if(now-now0>1500){ Tcur=Math.min(total,T0+(now-now0)/1000); } }   // a video that stays stuck is stepped over
+      else if(now-now0>1500) Tcur=Math.min(total,T0+(now-now0)/1000); }
+    if(Tcur>=total){ pause(); Tcur=total; if(exporting) exporting.finish(); } }
   const i=clipAt(Tcur);
   $('#empty').hidden=P.clips.length>0; $('#exportBtn').disabled=!P.clips.length;
   if(i>=0&&gl){
@@ -342,9 +350,11 @@ function frame(now){
     if(i!==curIdx){ const pc=curIdx>=0?P.clips[curIdx]:null;
       if(pc&&playing&&curIdx===i-1){ const pm=mediaFor(pc); upload(texPrev,1,pm.el); prevInfo={crop:crop(pm.el,pc.zoom),from:pc}; } else prevInfo=null;
       if(pc&&mediaFor(pc)!==m){ mediaFor(pc).el.pause(); if(mediaFor(pc).gain) mediaFor(pc).gain.gain.value=0; }
-      curIdx=i; m.el.currentTime=src; }
+      curIdx=i; if(!(playing&&Math.abs(m.el.currentTime-src)<.15)) m.el.currentTime=src; T0=Tcur; now0=now; }   // a cut that continues the same video plays straight on
     if(m.gain) m.gain.gain.value=playing?c.vol:0;
-    if(playing){ m.el.playbackRate=c.speed; if(m.el.paused){ const pr=m.el.play(); if(pr) pr.catch(()=>{}); } if(Math.abs(m.el.currentTime-src)>.3/Math.max(1,c.speed)) m.el.currentTime=src; }
+    if(playing){ if(m.el.paused){ const pr=m.el.play(); if(pr) pr.catch(()=>{}); }
+      if(exporting){ const d=src-m.el.currentTime; if(Math.abs(d)>.6&&!m.el.seeking) m.el.currentTime=src; else m.el.playbackRate=c.speed*Math.min(1.12,Math.max(.88,1+d*.8)); }   // catch up gently
+      else if(m.el.playbackRate!==c.speed) m.el.playbackRate=c.speed; }
     else if(!m.el.seeking&&Math.abs(m.el.currentTime-src)>.03) m.el.currentTime=src;
     upload(texCur,0,m.el);
     const pc=prevInfo&&prevInfo.from, trans=pc?pc.trans:'none', p=pc?(Tcur-c.t0)/.5:1;
@@ -825,7 +835,7 @@ setInterval(()=>{ if(tab!=='caps') return; const c=selClip(); if(!c||!mediaFor(c
 const cutDefault=()=>({from:0,to:null,bg:'none',ol:'none',col:'#ff8fc8',olCol:'#ff3df0',behind:'',behindAuto:false,doodles:false});
 P.cut=cutDefault();
 const BG_PICS={lava:'dragons/lava.jpg',frost:'dragons/frost.jpg',bronze:'dragons/bronze.jpg'};
-const SEG={state:'off',seg:null,ts:0,mask:null,w:0,h:0,el:null,at:-1,err:''};
+const SEG={last:0,cost:20,state:'off',seg:null,ts:0,mask:null,w:0,h:0,el:null,at:-1,err:''};
 const cutActive=()=>P.cut.bg!=='none'||P.cut.ol!=='none'||!!P.cut.behind.trim()||P.cut.behindAuto||P.cut.doodles;
 async function segLoad(){ if(SEG.state==='loading'||SEG.state==='ready') return; SEG.state='loading'; renderPanel();
   try{ const v=await import('./mp/vision_bundle.mjs'), base=new URL('mp/',location.href).href;
@@ -837,12 +847,14 @@ async function segLoad(){ if(SEG.state==='loading'||SEG.state==='ready') return;
 /* one mask per video frame; when paused on the same frame the last one is kept */
 function segRun(el){ if(SEG.state!=='ready'||el.readyState<2||!el.videoWidth) return !!SEG.mask&&SEG.el===el;
   if(SEG.el===el&&SEG.at===el.currentTime&&SEG.mask) return true;
+  if(playing&&!exporting&&SEG.el===el&&SEG.mask&&performance.now()-SEG.last<Math.min(150,SEG.cost*1.5)) return true;
+  const st=performance.now();
   const ts=SEG.ts=Math.max(SEG.ts+1,Math.round(performance.now()));
   try{ SEG.seg.segmentForVideo(el,ts,r=>{ const mk=r.confidenceMasks&&r.confidenceMasks[0]; if(!mk) return; const f=mk.getAsFloat32Array(), w=mk.width, h=mk.height;
       if(!SEG.mask||SEG.w!==w||SEG.h!==h){ SEG.mask=new Uint8Array(w*h); SEG.w=w; SEG.h=h; SEG.el=null; }
       const a=SEG.mask, k=SEG.el===el&&playing?.7:1; for(let i=0;i<a.length;i++) a[i]=a[i]*(1-k)+f[i]*255*k; }); }
   catch(e){ console.error(e); return false; }
-  SEG.el=el; SEG.at=el.currentTime;
+  SEG.el=el; SEG.at=el.currentTime; SEG.last=performance.now(); SEG.cost=SEG.cost*.8+(SEG.last-st)*.2;
   gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D,texMask); gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,SEG.w,SEG.h,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,SEG.mask); gl.pixelStorei(gl.UNPACK_ALIGNMENT,4);
   return true; }
