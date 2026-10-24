@@ -42,9 +42,10 @@ button{cursor:pointer}
 /* timeline */
 .tl{position:relative;overflow-x:auto;overflow-y:hidden;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 0;scrollbar-width:none;touch-action:pan-x}
 .tl::-webkit-scrollbar{display:none}
-.tlin{position:relative;height:118px;margin:0 50%}
+.tlin{position:relative;height:142px;margin:0 50%}
 .row{position:absolute;left:0;height:44px}
-.row.ov{top:50px;height:26px}.row.mu{top:82px;height:26px}
+.row.ov{top:50px;height:26px}.row.mu{top:82px;height:26px}.row.fx{top:114px;height:24px}
+.bar.fxb{height:11px;padding:0 6px;font-size:9px;line-height:9px;background:color-mix(in srgb,#b48cff 45%,var(--panel2))}.bar.fxb.cut{top:13px;background:color-mix(in srgb,#5dd6a0 45%,var(--panel2))}
 .blk{position:absolute;top:0;height:100%;border-radius:8px;border:2px solid transparent;overflow:hidden;background:var(--panel2) center/auto 100% repeat-x;display:flex;align-items:flex-end;padding:2px 5px;font-size:10.5px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap}
 .blk.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
 .blk .tr{position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;background:var(--gold);color:var(--ink);font-size:10px;display:grid;place-items:center;z-index:2}
@@ -112,7 +113,7 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
   </div>
 
   <div class="tl" id="tl"><div class="zoom"><button id="zOut" aria-label="Zoom out">−</button><button id="zIn" aria-label="Zoom in">+</button></div>
-    <div class="tlin" id="tlin"><div class="row" id="rowClips"></div><div class="row ov" id="rowOv"></div><div class="row mu" id="rowMu"></div><div class="ph" id="ph"></div></div></div>
+    <div class="tlin" id="tlin"><div class="row" id="rowClips"></div><div class="row ov" id="rowOv"></div><div class="row mu" id="rowMu"></div><div class="row fx" id="rowFx"></div><div class="ph" id="ph"></div></div></div>
 
   <div class="tabs" id="tabs">
     <button data-tab="add"><i>＋</i><span data-t="tAdd"></span></button>
@@ -142,7 +143,7 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
 <script>
 /* ---------- words ---------- */
 const T={
- en:{title:'Editor',save:'Save',tCut:'Cutout',cutHint:'Finds her in the video, so things can go behind her.',cutLoading:'Loading the cutout… (the first time it downloads about 10 MB)',cutFail:'The cutout could not start on this phone: ',background:'Background',bgNone:'Original',bgBlur:'Blur',bgDark:'Dark',bgColour:'Colour',bgPhoto:'📷 Photo',outline:'Outline',olNone:'None',olWhite:'White',olNeon:'Neon',olChalk:'Chalk',olFire:'Fire',behindTxt:'Big text behind her',behindPh:'e.g. HAPPY',tStyle:'Styles',tCaps:'Captions',
+ en:{title:'Editor',save:'Save',when:'When',startHere:'Start here',endHere:'End here',wholeVid:'Whole video',tCut:'Cutout',cutHint:'Finds her in the video, so things can go behind her.',cutLoading:'Loading the cutout… (the first time it downloads about 10 MB)',cutFail:'The cutout could not start on this phone: ',background:'Background',bgNone:'Original',bgBlur:'Blur',bgDark:'Dark',bgColour:'Colour',bgPhoto:'📷 Photo',outline:'Outline',olNone:'None',olWhite:'White',olNeon:'Neon',olChalk:'Chalk',olFire:'Fire',behindTxt:'Big text behind her',behindPh:'e.g. HAPPY',tStyle:'Styles',tCaps:'Captions',
   stHint:'Moving captions in one tap. Add the words under Captions; they follow her voice.',stNone:'Off',capSize:'Size',capY:'Height',needWords:'No words yet: go to Captions.',
   capsHint:'Where do the words come from?',hear:'✨ Hear my words',hearNo:'Hear my words needs a free Gemini key, the same one the Oracle in Suffler uses. Paste it here:',fromScript:'Use a Suffler script',typePh:'Or type / paste what she says…',match:'Match to voice',
   listening:'Listening…',matching:'Matching words to the voice…',matched:'Done: {n} words. Play it. A word too early or late? Tap it, move the playhead to where it is said and tap Starts here.',noVoice:'Could not hear speech in this video.',hearFail:'Hearing failed: ',
@@ -158,7 +159,7 @@ const T={
   musicHint:'Pick a song or sound from your phone.',pickMusic:'Choose music',musicVol:'Music',duck:'Lower music under the voice',removeMusic:'Remove music',
   formatHint:'The shape of the finished video.',fit:'Fill the frame (crop) · zoom each clip under Filters',
   saveT:'Save video',saveHint:'The video plays through once while it is saved, so it takes as long as the video. On iPhone it goes to Files › Downloads; from there Share › Save Video puts it in Photos.',saveGo:'Save',close:'Close',saving:'Saving… ',saved:'Saved. Look in your downloads.',saveFail:'This browser could not save the video.',leave:'Leave the editor? Your edit is not kept.'},
- uk:{title:'Редактор',save:'Зберегти',tCut:'Вирізати',cutHint:'Знаходить її у відео, щоб щось могло бути позаду неї.',cutLoading:'Завантажую вирізання… (першого разу це приблизно 10 МБ)',cutFail:'Вирізання не запустилось на цьому телефоні: ',background:'Фон',bgNone:'Оригінал',bgBlur:'Розмиття',bgDark:'Темний',bgColour:'Колір',bgPhoto:'📷 Фото',outline:'Контур',olNone:'Без',olWhite:'Білий',olNeon:'Неон',olChalk:'Крейда',olFire:'Вогонь',behindTxt:'Великий текст позаду неї',behindPh:'напр. ЩАСТЯ',tStyle:'Стилі',tCaps:'Субтитри',
+ uk:{title:'Редактор',save:'Зберегти',when:'Коли',startHere:'Почати тут',endHere:'Закінчити тут',wholeVid:'Усе відео',tCut:'Вирізати',cutHint:'Знаходить її у відео, щоб щось могло бути позаду неї.',cutLoading:'Завантажую вирізання… (першого разу це приблизно 10 МБ)',cutFail:'Вирізання не запустилось на цьому телефоні: ',background:'Фон',bgNone:'Оригінал',bgBlur:'Розмиття',bgDark:'Темний',bgColour:'Колір',bgPhoto:'📷 Фото',outline:'Контур',olNone:'Без',olWhite:'Білий',olNeon:'Неон',olChalk:'Крейда',olFire:'Вогонь',behindTxt:'Великий текст позаду неї',behindPh:'напр. ЩАСТЯ',tStyle:'Стилі',tCaps:'Субтитри',
   stHint:'Живі субтитри в один дотик. Додай слова у «Субтитри» — вони йдуть за голосом.',stNone:'Без',capSize:'Розмір',capY:'Висота',needWords:'Слів ще немає: відкрий «Субтитри».',
   capsHint:'Звідки взяти слова?',hear:'✨ Почути мої слова',hearNo:'Для цього потрібен безкоштовний ключ Gemini, той самий, що в Оракула в Suffler. Встав його сюди:',fromScript:'Взяти сценарій Suffler',typePh:'Або напиши / встав, що вона каже…',match:'Підігнати під голос',
   listening:'Слухаю…',matching:'Підганяю слова під голос…',matched:'Готово: {n} слів. Програй. Слово зарано чи запізно? Торкнись його, постав позначку туди, де воно звучить, і натисни «Звідси».',noVoice:'Не чути мови в цьому відео.',hearFail:'Не вдалося почути: ',
@@ -232,7 +233,7 @@ $('#pick0').onchange=e=>{ addFiles(e.target.files); e.target.value=''; };
 const gl=$('#gl').getContext('webgl',{preserveDrawingBuffer:true,premultipliedAlpha:false}), ov=$('#ov'), ox=ov.getContext('2d');
 const VS='attribute vec2 a; varying vec2 uv; void main(){ uv=vec2(a.x*.5+.5,.5-a.y*.5); gl_Position=vec4(a,0.,1.); }';
 const FS=`precision mediump float; varying vec2 uv; uniform sampler2D cur,prev; uniform vec4 cropC,cropP; uniform vec4 adj; uniform float grain,mode,p,hasPrev,t; uniform vec4 duo; uniform vec2 grade;
-uniform sampler2D mask,behind,bgImg,refM,softM; uniform float sec; uniform float seg,bgMode,bgDim,behindOn,olMode,olW,asp; uniform vec3 bgCol,olCol; uniform vec4 bgCrop;
+uniform sampler2D mask,behind,bgImg,refM,softM; uniform float sec,cutAmt; uniform float seg,bgMode,bgDim,behindOn,olMode,olW,asp; uniform vec3 bgCol,olCol; uniform vec4 bgCrop;
 vec3 look(vec3 c){ c+=adj.x; c=(c-.5)*adj.y+.5; float l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,adj.z); c.r+=adj.w*.12; c.b-=adj.w*.12;
   l=dot(c,vec3(.299,.587,.114)); c=mix(vec3(l),c,grade.x); c.r+=grade.y*.1; c.b-=grade.y*.1;
   vec3 d=mix(vec3(.03,0.,.02),duo.rgb*1.15,smoothstep(.02,.9,l)); return mix(c,d,duo.a); }
@@ -262,7 +263,7 @@ vec3 person(vec3 c,vec2 q){
   return mix(bg,c,m); }
 void main(){
   vec3 c=look(samp(cur,cropC,uv));
-  if(seg>.5) c=person(c,cropC.xy+uv*cropC.zw);
+  if(seg>.5) c=mix(c,person(c,cropC.xy+uv*cropC.zw),cutAmt);
   if(hasPrev>.5&&p<1.){ vec3 o=look(samp(prev,cropP,uv));
     if(mode<1.5) c=mix(o,c,p);                                                  // fade
     else if(mode<2.5){ float q=1.-pow(1.-p,3.);                                // slide in from the right
@@ -279,7 +280,7 @@ let prog,U={},texCur,texPrev,texMask,texBehind,texBg;
   prog=gl.createProgram(); gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS)); gl.linkProgram(prog); gl.useProgram(prog);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const a=gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
-  ['cur','prev','cropC','cropP','adj','grain','mode','p','hasPrev','t','duo','grade','mask','behind','bgImg','seg','bgMode','bgDim','behindOn','olMode','olW','asp','bgCol','olCol','bgCrop','refM','softM','sec'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+  ['cur','prev','cropC','cropP','adj','grain','mode','p','hasPrev','t','duo','grade','mask','behind','bgImg','seg','bgMode','bgDim','behindOn','olMode','olW','asp','bgCol','olCol','bgCrop','refM','softM','sec','cutAmt'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
   const mk=u=>{ const x=gl.createTexture(); gl.activeTexture(gl.TEXTURE0+u); gl.bindTexture(gl.TEXTURE_2D,x);
     [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]].forEach(([k,v])=>gl.texParameteri(gl.TEXTURE_2D,k,v));
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255])); return x; };
@@ -371,14 +372,18 @@ requestAnimationFrame(frame);
 let tlDrag=false;
 function renderTimeline(){
   layout(); const w=Math.max(1,total*scale);
-  $('#tlin').style.width=w+'px'; ['#rowClips','#rowOv','#rowMu'].forEach(q=>$(q).style.width=w+'px');
+  $('#tlin').style.width=w+'px'; ['#rowClips','#rowOv','#rowMu','#rowFx'].forEach(q=>$(q).style.width=w+'px');
   $('#rowClips').innerHTML=P.clips.map((c,i)=>{ const m=mediaFor(c)||{}; const isSel=sel&&sel.kind==='clip'&&sel.id===c.id;
     return `<div class="blk${isSel?' sel':''}" data-clip="${c.id}" style="left:${c.t0*scale}px;width:${Math.max(6,c.len*scale-2)}px;${m.thumb?`background-image:url(${m.thumb})`:''}">${c.speed!==1?c.speed+'× ':''}${fmt(c.len)}${i<P.clips.length-1&&c.trans!=='none'?'<span class="tr">⧉</span>':''}</div>`; }).join('');
   // text and stickers share one lane; overlapping ones get thinner
   $('#rowOv').innerHTML=P.items.map(it=>`<div class="bar${it.type==='sticker'?' st':''}${sel&&sel.kind==='item'&&sel.id===it.id?' sel':''}" data-item="${it.id}" style="left:${it.start*scale}px;width:${Math.max(16,(it.end-it.start)*scale)}px">${esc(it.type==='sticker'?it.text:it.text.split('\n')[0])}</div>`).join('');
   $('#rowMu').innerHTML=P.music?`<div class="bar music${sel&&sel.kind==='music'?' sel':''}" data-music="1" style="left:${P.music.at*scale}px;width:${Math.max(16,Math.min(P.music.dur,Math.max(0,total-P.music.at))*scale)}px">♪ ${esc(P.music.name)}</div>`:'';
+  // when the caption style and the cutout effects are on
+  const fxBar=(k,cls,label)=>{ const [a,b]=rangeOf(k); return `<div class="bar fxb ${cls}" data-fx="${k}" style="left:${a*scale}px;width:${Math.max(16,(b-a)*scale)}px">${label}</div>`; };
+  $('#rowFx').innerHTML=(TPL[P.tpl]?fxBar('tpl','','✨ '+TPL[P.tpl].name):'')+(typeof cutActive==='function'&&cutActive()?fxBar('cut','cut','🧍 '+t('tCut')):'');
 }
 $('#tlin').addEventListener('click',e=>{
+  const fb=e.target.closest('[data-fx]'); if(fb){ tab=fb.dataset.fx==='tpl'?'style':'cut'; refresh(); return; }
   const b=e.target.closest('[data-clip],[data-item],[data-music]'), r=$('#tlin').getBoundingClientRect(), T=(e.clientX-r.left)/scale;
   if(b){ sel=b.dataset.clip?{kind:'clip',id:b.dataset.clip}:b.dataset.item?{kind:'item',id:b.dataset.item}:{kind:'music'};
     if(sel.kind==='item'&&tab!=='text'&&tab!=='sticker') tab=selItem().type==='sticker'?'sticker':'text';
@@ -558,7 +563,26 @@ function chunkAt(T){ return chunksNow().find(c=>T>=c.s&&T<c.end)||null; }
 function wordAt(ch,T){ if(!ch) return null; let w=null; for(const x of ch) if(T>=x.s) w=x; return w; }
 
 /* the picture side of a style: zoom punch on key words, the colour grade, a red flash for Impact */
-function capsFx(T){ const tp=TPL[P.tpl], fx={punch:1,duo:[0,0,0,0],grade:[1,0],grain:0}; if(!tp) return fx;
+/* effects run between from and until (until empty = to the end), easing in and out over a third of a second */
+P.tplFrom=0; P.tplTo=null;
+function rangeOf(k){ const a=k==='tpl'?P.tplFrom:P.cut.from, b=k==='tpl'?P.tplTo:P.cut.to; const A=Math.min(Math.max(0,a||0),total), B=b==null?total:Math.min(total,b); return [A,Math.max(A,B)]; }
+function rangeAmt(k,T){ const [a,b]=rangeOf(k); if(T<a||T>b) return 0; return Math.min(1,a<=0?1:(T-a)/.3,b>=total-1e-3?1:(b-T)/.3); }
+function rangeUI(k){ const [a,b]=rangeOf(k);
+  return `<div class="sub">${t('when')}</div><div class="btns"><button data-rng="${k}:start">⏱ ${t('startHere')}</button><button data-rng="${k}:end">⏱ ${t('endHere')}</button><button data-rng="${k}:all">${t('wholeVid')}</button></div>
+    ${sliderRow('rf_'+k,t('from'),0,Math.max(.1,total),.05,a,fmt(a))}${sliderRow('rt_'+k,t('to'),0,Math.max(.1,total),.05,b,fmt(b))}`; }
+function setRange(k,a,b){ if(k==='tpl'){ P.tplFrom=a; P.tplTo=b; } else { P.cut.from=a; P.cut.to=b; } }
+$('#panel').addEventListener('click',e=>{ const b=e.target.closest('[data-rng]'); if(!b) return; const [k,what]=b.dataset.rng.split(':'), [a,z]=rangeOf(k);
+  if(what==='start') setRange(k,Math.min(Tcur,z-.2),k==='tpl'?P.tplTo:P.cut.to);
+  else if(what==='end') setRange(k,k==='tpl'?P.tplFrom:P.cut.from,Math.max(Tcur,a+.2));
+  else setRange(k,0,null);
+  refresh(); e.stopImmediatePropagation(); },true);
+$('#panel').addEventListener('input',e=>{ const m=/^r([ft])_(tpl|cut)$/.exec(e.target.id); if(!m) return; const v=+e.target.value, [a,z]=rangeOf(m[2]);
+  if(m[1]==='f') setRange(m[2],Math.min(v,z-.2),m[2]==='tpl'?P.tplTo:P.cut.to); else setRange(m[2],m[2]==='tpl'?P.tplFrom:P.cut.from,v>=total-.05?null:Math.max(v,a+.2));
+  const [na,nz]=rangeOf(m[2]); $('#'+e.target.id+'O').textContent=fmt(m[1]==='f'?na:nz); seek(m[1]==='f'?na:Math.max(0,nz-.05)); renderTimeline(); e.stopImmediatePropagation(); },true);
+function capsFx(T){ const fx=capsFx0(T), a=rangeAmt('tpl',T); if(a>=1) return fx;
+  return {punch:1+(fx.punch-1)*a,duo:[fx.duo[0],fx.duo[1],fx.duo[2],fx.duo[3]*a],grade:[1+(fx.grade[0]-1)*a,fx.grade[1]*a],grain:fx.grain*a}; }
+function drawCaps(T){ const a=rangeAmt('tpl',T); if(a<=0) return; ox.save(); ox.globalAlpha=a; drawCaps0(T); ox.restore(); }
+function capsFx0(T){ const tp=TPL[P.tpl], fx={punch:1,duo:[0,0,0,0],grade:[1,0],grain:0}; if(!tp) return fx;
   fx.grade=tp.grade.slice(); fx.grain=tp.grain;
   const ch=chunkAt(T), w=wordAt(ch,T);
   if(w&&w.w.key&&T<w.e+.15){ const a=Math.min(1,(T-w.s)/.14), b=Math.min(1,(w.e+.15-T)/.14), k=Math.min(a,b), e=k*k*(3-2*k);
@@ -568,7 +592,7 @@ function capsFx(T){ const tp=TPL[P.tpl], fx={punch:1,duo:[0,0,0,0],grade:[1,0],g
   return fx; }
 
 /* ---------- drawing the captions ---------- */
-function drawCaps(T){
+function drawCaps0(T){
   const tp=TPL[P.tpl]; if(!tp) return; const W=ov.width, H=ov.height, x=ox;
   if(P.tpl==='neon'&&!segLive) neonFrame(ox,T,W,H);
   const ch=chunkAt(T);
@@ -724,7 +748,7 @@ function capsPanel(pn,c){
   if(tab==='style'){ const hasWords=capWords().length>0;
     pn.innerHTML=`<p class="hint">${t('stHint')}</p><div class="tpls">${['none',...Object.keys(TPL)].map(k=>{ const tp=TPL[k];
       return `<button data-tpl="${k}" class="tpl${P.tpl===k?' on':''}" style="background:${tp?tp.bg:'var(--panel2)'}"><span style="${tp?tp.sampleCss:'font:800 15px Nunito;color:var(--muted)'}">${tp?tp.sample:'—'}</span><b>${tp?tp.name:t('stNone')}</b></button>`; }).join('')}</div>
-      ${P.tpl!=='none'?(hasWords?'':`<p class="hint">${t('needWords')}</p>`)+sliderRow('csz',t('capSize'),.6,1.6,.02,P.capSize,Math.round(P.capSize*100)+'%')+sliderRow('cy',t('capY'),.12,.9,.01,P.capY??TPL[P.tpl].y,Math.round((P.capY??TPL[P.tpl].y)*100)+'%'):''}`;
+      ${P.tpl!=='none'?(hasWords?'':`<p class="hint">${t('needWords')}</p>`)+sliderRow('csz',t('capSize'),.6,1.6,.02,P.capSize,Math.round(P.capSize*100)+'%')+sliderRow('cy',t('capY'),.12,.9,.01,P.capY??TPL[P.tpl].y,Math.round((P.capY??TPL[P.tpl].y)*100)+'%')+rangeUI('tpl'):''}`;
     return; }
   if(!c){ pn.innerHTML=`<p class="hint">${t('pickClip')}</p>`; return; }
   const m=mediaFor(c), cap=m.cap, scr=SFscripts();
@@ -747,7 +771,7 @@ async function capRun(c,fn,label){ const m=mediaFor(c); capBusy=label; renderPan
   refresh(); }
 $('#panel').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b||!(tab==='style'||tab==='caps')) return; const c=selClip(), d=b.dataset;
-  if(d.tpl){ P.tpl=d.tpl; P.capY=null; P.cut=Object.assign(cutDefault(),(TPL[P.tpl]||{}).cut||{}); if(cutActive()) segLoad(); refresh(); if(!playing){ const ch=chunksNow()[0]; if(ch&&(Tcur<ch.s-.1||!chunkAt(Tcur))) seek(ch.s); } e.stopImmediatePropagation(); return; }
+  if(d.tpl){ P.tpl=d.tpl; P.capY=null; P.cut=Object.assign(cutDefault(),(TPL[P.tpl]||{}).cut||{},{from:P.cut.from,to:P.cut.to}); if(cutActive()) segLoad(); refresh(); if(!playing){ const ch=chunksNow()[0]; if(ch&&(Tcur<ch.s-.1||!chunkAt(Tcur))) seek(ch.s); } e.stopImmediatePropagation(); return; }
   if(!c) return; const m=mediaFor(c);
   if(d.act==='hear'){ capRun(c,hearWords,t('listening')); }
   else if(d.act==='matchText'){ const tx=$('#capText').value.trim(); if(tx) capRun(c,mm=>matchText(mm,tx),t('matching')); }
@@ -770,7 +794,7 @@ setInterval(()=>{ if(tab!=='caps') return; const c=selClip(); if(!c||!mediaFor(c
 
 /* ---------- cutout: MediaPipe finds her in every frame (on the phone, nothing is sent anywhere) ----------
    The mask is in video pixels, so the shader reads it with the same crop as the picture. */
-const cutDefault=()=>({bg:'none',ol:'none',col:'#ff8fc8',olCol:'#ff3df0',behind:'',behindAuto:false,doodles:false});
+const cutDefault=()=>({from:0,to:null,bg:'none',ol:'none',col:'#ff8fc8',olCol:'#ff3df0',behind:'',behindAuto:false,doodles:false});
 P.cut=cutDefault();
 const BG_PICS={lava:'dragons/lava.jpg',frost:'dragons/frost.jpg',bronze:'dragons/bronze.jpg'};
 const SEG={state:'off',seg:null,ts:0,mask:null,w:0,h:0,el:null,at:-1,err:''};
@@ -853,7 +877,7 @@ function refineMask(cropC){
   gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D,PASS.tSoft.tx);
   gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.useProgram(prog); gl.viewport(0,0,W,H); const a=gl.getAttribLocation(prog,'a'); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0); gl.enableVertexAttribArray(a); }
 let segLive=false;
-function cutUniforms(el,T,cropC){ const on=cutActive()&&segRun(el); segLive=on; gl.uniform1f(U.seg,on?1:0); if(!on) return;
+function cutUniforms(el,T,cropC){ const amt=cutActive()?rangeAmt('cut',T):0, on=amt>0&&segRun(el); gl.uniform1f(U.cutAmt,amt); segLive=on; gl.uniform1f(U.seg,on?1:0); if(!on) return;
   refineMask(cropC);
   const c=P.cut, bgm={none:0,blur:1,dark:2,colour:3}[c.bg]; let mode=bgm;
   if(mode===undefined){ if(BG_PICS[c.bg]) useBgPic(c.bg,BG_PICS[c.bg]); else if(c.bg==='photo'&&c.photo) useBgPic('photo:'+c.photo,c.photo);
@@ -868,7 +892,7 @@ function cutPanel(pn){ const c=P.cut, b=(k,v,lab)=>`<button data-cut="${k}" data
     ${c.bg==='colour'?`<div class="sw">${['#ff8fc8','#ffd23f','#7cf5ff','#7dff8a','#b48cff','#ff8a3d','#ffffff','#111111'].map(x=>`<button data-cutcol="${x}" class="${c.col===x?'on':''}" style="background:${x}" aria-label="${x}"></button>`).join('')}</div>`:''}
     <div class="sub">${t('outline')}</div><div class="btns">${b('ol','none',t('olNone'))}${b('ol','white',t('olWhite'))}${b('ol','neon',t('olNeon'))}${b('ol','chalk',t('olChalk'))}${b('ol','fire',t('olFire'))}</div>
     ${c.ol==='neon'?`<div class="sw">${['#ff3df0','#3dd8ff','#5dff9d','#ffe14a','#ff5d3d','#b48cff'].map(x=>`<button data-olcol="${x}" class="${c.olCol===x?'on':''}" style="background:${x}" aria-label="${x}"></button>`).join('')}</div>`:''}
-    <div class="sub">${t('behindTxt')}</div><input type="text" id="behindTxt" value="${esc(c.behind)}" placeholder="${t('behindPh')}">`; }
+    <div class="sub">${t('behindTxt')}</div><input type="text" id="behindTxt" value="${esc(c.behind)}" placeholder="${t('behindPh')}">${cutActive()?rangeUI('cut'):''}`; }
 $('#panel').addEventListener('click',e=>{ if(tab!=='cut') return; const b=e.target.closest('button'); if(!b) return; const d=b.dataset;
   if(d.cut) P.cut[d.cut]=d.v; else if(d.cutcol) P.cut.col=d.cutcol; else if(d.olcol) P.cut.olCol=d.olcol; else return;
   if(cutActive()) segLoad(); renderPanel(); e.stopImmediatePropagation(); },true);
