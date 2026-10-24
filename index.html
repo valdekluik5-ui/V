@@ -230,7 +230,7 @@ textarea#text::placeholder{color:var(--mist);font-style:italic}
       <circle class="tw" cx="190" cy="196" r="1.1" fill="#ffd9e8"/><circle class="tw d2" cx="28" cy="210" r="1" fill="#f0c97a"/><circle class="tw d3" cx="368" cy="30" r="1.2" fill="#ffd9e8"/>
     </svg>
     <div class="hello">
-      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v21</span><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
+      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v22</span><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
       <h1 id="greet"></h1>
       <div class="season" id="season"></div>
       <p data-t="ask"></p>
@@ -348,6 +348,9 @@ textarea#text::placeholder{color:var(--mist);font-style:italic}
           <div class="opts" id="sizes"><button data-v="orig" data-t="sOrig"></button><button data-v="916" data-t="s916"></button></div>
         </div>
         <div class="tool" data-tool="sound" hidden>
+          <label class="row sw"><span data-t="cleanOn"></span><input type="checkbox" id="cleanOn"></label>
+          <div class="opts" id="cleanLvl"><button data-v="light" data-t="cLight"></button><button data-v="strong" data-t="cStrong"></button><button data-v="max" data-t="cMax"></button></div>
+          <p class="hint" id="cleanHint" data-t="cleanHint"></p>
           <label class="row"><span data-t="eVol"></span><input type="range" id="eVol" min="-12" max="15" step="1" value="0"><output id="oVol">0 dB</output></label>
         </div>
       </div>
@@ -379,12 +382,14 @@ const T={
   save:'Зберегти відео',again:'Записати ще раз',savedHint:'Збережено в папку «Завантаження».',noVideo:'Камери немає, тому нічого не записано. Це була репетиція.',
   sample:'Привіт! Сьогодні я покажу вам три прості звички, які змінили мій ранок.\n\nПерша — склянка води одразу після пробудження. Звучить банально, але вона будить мене швидше за каву.\n\nДруга — п’ять хвилин без телефону. Я сиджу біля вікна і думаю, що для мене важливо сьогодні.\n\nА третя — записати одну річ, яку я зроблю до обіду. Тільки одну.\n\nНапишіть у коментарях, яка звичка вам подобається найбільше, і підписуйтесь!'}
 };
-Object.assign(T.en,{look:'Look',colour:'Colour',lookSuffler:'Suffler',lookLava:'Lava dragon',lookFrost:'Frost dragon',lookBronze:'Bronze dragon',lookHint:'The dragon lives behind your scripts and wakes up as the countdown before you record. Your video is not changed.',cOwn:'Picture’s own',cCycle:'Changing',cFire:'Fire',cCrimson:'Crimson',cGold:'Gold',cJade:'Jade',cFrost:'Frost',cViolet:'Violet',cSteel:'Steel',
+Object.assign(T.en,{cleanOn:'Only my voice',cLight:'Light',cStrong:'Strong',cMax:'Max',cleanHint:'Removes steady background noise like traffic, wind rumble, fans and hum, and keeps your voice.',cleaning:'Removing the noise…',cleanDone:'Background noise removed. Play to listen.',cleanFail:'Could not read the sound of this take.',
+  look:'Look',colour:'Colour',lookSuffler:'Suffler',lookLava:'Lava dragon',lookFrost:'Frost dragon',lookBronze:'Bronze dragon',lookHint:'The dragon lives behind your scripts and wakes up as the countdown before you record. Your video is not changed.',cOwn:'Picture’s own',cCycle:'Changing',cFire:'Fire',cCrimson:'Crimson',cGold:'Gold',cJade:'Jade',cFrost:'Frost',cViolet:'Violet',cSteel:'Steel',
   ph:'Write or paste what you will say…',morning:'Good morning',day:'Good afternoon',evening:'Good evening',ask:'What will you say to the camera today?',newScript:'New script',quick:'Record the latest script',yours:'YOUR SCRIPTS',nScripts:n=>n===1?'1 script':n+' scripts',
   empty:'No scripts yet. Start a new one above.',ready:'Ready',draft:'Draft',takes:n=>n===1?'1 take':n+' takes',untitled:'Untitled script',scripts:'Back to scripts',record:'Record',del:'Delete script',delAsk:'Delete this script?',take:'Take',practice:'Practice run',toScript:'Back to script',sampleTitle:'Morning habits',oracle:'THE ORACLE',signs:['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'],seasonOf:n=>n+' season',
   use:'Use this',another:'Try another',close:'Close',cHook:'Stronger hook',cShorter:'Make it shorter',cWarmer:'Warmer tone',cTrans:'In Ukrainian',cFix:'Fix mistakes',askPh:'Ask: write a script about…',send:'Send',undo:'Undo',thinking:'The stars are reading…',forHook:'for the first line',forAll:'for the whole script',forNew:'a new script',aiNet:'No internet connection, or Gemini could not be reached.',aiFail:'The oracle could not answer. Try again in a moment.',aiBusy:'Gemini’s free limit is used up for now. Try again later, or ask ChatGPT instead.',aiBadKey:'This Gemini key does not work. Copy it again and paste it here.',keyTitle:'Connect the oracle to Gemini. It is free.',keyHow:'1. Open Google AI Studio and sign in with Google.\n2. Tap “Create API key” and copy it.\n3. Paste it below. The key stays only on this phone.',keyLink:'Open Google AI Studio ↗',keyPh:'Paste your Gemini key',gptBtn:'Ask ChatGPT instead',keyBtn:'Gemini key',gptSay:'Your request is copied and ChatGPT is opening. If the question is not there, paste it. Then copy ChatGPT’s answer and paste it here.',gptPh:'Paste ChatGPT’s answer',paste:'Paste',aiRefused:'The oracle cannot help with this one.',
   tTrim:'Trim',tCaps:'Captions',tLook:'Filter',tMusic:'Music',tTidy:'Pauses',tSound:'Sound',capsOn:'Show captions',capsHint:'Made from your script, timed to your voice.',capsNone:'No word timing for this take, so no captions.',lNone:'Natural',lWarm:'Warm',lSoft:'Soft',lMono:'Black & white',lMoon:'Midnight',mNone:'No music',mPad:'Starlight pad',mSong:'Your song…',mVol:'Music volume',tidyOn:'Remove pauses',tidyHint:(n,s)=>`Found ${n} ${n===1?'pause':'pauses'}, ${s} s in total.`,tidyNone:'No long pauses found.',sOrig:'Original',s916:'9:16 vertical',notePauses:(n,s)=>`The oracle found ${n} ${n===1?'pause':'pauses'} (${s} s) you can remove.`,noteCaps:'Captions are ready.'});
-Object.assign(T.uk,{look:'Вигляд',colour:'Колір',lookSuffler:'Suffler',lookLava:'Лавовий дракон',lookFrost:'Крижаний дракон',lookBronze:'Бронзовий дракон',lookHint:'Дракон живе за твоїми сценаріями і прокидається під час відліку перед записом. Саме відео не змінюється.',cOwn:'Як на картинці',cCycle:'Мінливий',cFire:'Вогонь',cCrimson:'Багряний',cGold:'Золотий',cJade:'Нефритовий',cFrost:'Крижаний',cViolet:'Фіолетовий',cSteel:'Сталевий',
+Object.assign(T.uk,{cleanOn:'Лише мій голос',cLight:'Легко',cStrong:'Сильно',cMax:'Максимум',cleanHint:'Прибирає постійний фоновий шум — транспорт, гул вітру, вентилятори, дзижчання — і залишає твій голос.',cleaning:'Прибираю шум…',cleanDone:'Фоновий шум прибрано. Увімкни, щоб послухати.',cleanFail:'Не вдалося прочитати звук цього дубля.',
+  look:'Вигляд',colour:'Колір',lookSuffler:'Suffler',lookLava:'Лавовий дракон',lookFrost:'Крижаний дракон',lookBronze:'Бронзовий дракон',lookHint:'Дракон живе за твоїми сценаріями і прокидається під час відліку перед записом. Саме відео не змінюється.',cOwn:'Як на картинці',cCycle:'Мінливий',cFire:'Вогонь',cCrimson:'Багряний',cGold:'Золотий',cJade:'Нефритовий',cFrost:'Крижаний',cViolet:'Фіолетовий',cSteel:'Сталевий',
   ph:'Напиши або встав те, що скажеш…',morning:'Доброго ранку',day:'Добрий день',evening:'Добрий вечір',ask:'Що скажеш камері сьогодні?',newScript:'Новий сценарій',quick:'Записати останній сценарій',yours:'ТВОЇ СЦЕНАРІЇ',nScripts:n=>n+' '+plural(n,'сценарій','сценарії','сценаріїв'),
   empty:'Сценаріїв ще немає. Почни новий вище.',ready:'Готово',draft:'Чернетка',takes:n=>n+' '+plural(n,'дубль','дублі','дублів'),untitled:'Без назви',scripts:'До сценаріїв',record:'Запис',del:'Видалити сценарій',delAsk:'Видалити цей сценарій?',take:'Дубль',practice:'Репетиція',toScript:'До сценарію',sampleTitle:'Ранкові звички',oracle:'ОРАКУЛ',signs:['Овен','Телець','Близнюки','Рак','Лев','Діва','Терези','Скорпіон','Стрілець','Козеріг','Водолій','Риби'],seasonOf:n=>'Сезон: '+n,
   use:'Взяти',another:'Інший варіант',close:'Закрити',cHook:'Сильніший початок',cShorter:'Коротше',cWarmer:'Тепліше',cTrans:'Англійською',cFix:'Виправити помилки',askPh:'Попроси: напиши сценарій про…',send:'Надіслати',undo:'Повернути',thinking:'Зорі читають…',forHook:'для першого речення',forAll:'для всього сценарію',forNew:'новий сценарій',aiNet:'Немає інтернету або Gemini недоступний.',aiFail:'Оракул не зміг відповісти. Спробуй ще раз.',aiBusy:'Безкоштовний ліміт Gemini поки вичерпано. Спробуй пізніше або запитай ChatGPT.',aiBadKey:'Цей ключ Gemini не працює. Скопіюй його ще раз і встав сюди.',keyTitle:'Підключи оракула до Gemini. Це безкоштовно.',keyHow:'1. Відкрий Google AI Studio і увійди через Google.\n2. Натисни «Create API key» і скопіюй ключ.\n3. Встав його нижче. Ключ зберігається лише на цьому телефоні.',keyLink:'Відкрити Google AI Studio ↗',keyPh:'Встав ключ Gemini',gptBtn:'Запитати ChatGPT',keyBtn:'Ключ Gemini',gptSay:'Запит скопійовано, ChatGPT відкривається. Якщо питання немає, встав його. Потім скопіюй відповідь ChatGPT і встав сюди.',gptPh:'Встав відповідь ChatGPT',paste:'Вставити',aiRefused:'З цим оракул допомогти не може.',
@@ -957,18 +962,100 @@ function edHints(){
   $('#note').hidden=!bits.length;$('#noteText').textContent=bits.join(' ');
 }
 
+/* ---------- "Only my voice": background noise removed from the take, on the phone ---------- */
+/* "Only my voice": spectral noise removal, all on the phone.
+   The recording is cut into short overlapping slices; for every pitch band we learn how loud the background is (the
+   quiet level that band keeps returning to, i.e. between words), then turn each band down where it is no louder than
+   that background and keep it where her voice rises above it. Gains are smoothed over time and pitch so the voice
+   stays natural, and a floor keeps a trace of room tone so it never sounds cut out. */
+function cleanVoice(x,rate,strength,onProgress){
+  const N=2048, H=N/4, bins=N/2+1, win=new Float32Array(N);
+  for(let i=0;i<N;i++) win[i]=.5-.5*Math.cos(2*Math.PI*i/N);
+  // in-place radix-2 FFT
+  const rev=new Uint32Array(N); for(let i=0,j=0;i<N;i++){ rev[i]=j; let b=N>>1; while(j&b){ j^=b; b>>=1; } j|=b; }
+  const cosT=new Float32Array(N/2), sinT=new Float32Array(N/2); for(let i=0;i<N/2;i++){ cosT[i]=Math.cos(2*Math.PI*i/N); sinT[i]=-Math.sin(2*Math.PI*i/N); }
+  function fft(re,im,inv){
+    for(let i=0;i<N;i++){ const j=rev[i]; if(j>i){ let t=re[i]; re[i]=re[j]; re[j]=t; t=im[i]; im[i]=im[j]; im[j]=t; } }
+    for(let size=2;size<=N;size<<=1){ const half=size>>1, step=N/size;
+      for(let i=0;i<N;i+=size) for(let k=0;k<half;k++){ const c=cosT[k*step], s=inv?-sinT[k*step]:sinT[k*step], a=i+k, b=a+half;
+        const tr=re[b]*c-im[b]*s, ti=re[b]*s+im[b]*c; re[b]=re[a]-tr; im[b]=im[a]-ti; re[a]+=tr; im[a]+=ti; } }
+  }
+  const frames=Math.max(1,Math.ceil((x.length-N)/H)+1), pad=new Float32Array((frames-1)*H+N); pad.set(x);
+  const mags=new Float32Array(frames*bins), re=new Float32Array(N), im=new Float32Array(N);
+  for(let f=0;f<frames;f++){ const o=f*H; for(let i=0;i<N;i++){ re[i]=pad[o+i]*win[i]; im[i]=0; } fft(re,im,false);
+    for(let k=0;k<bins;k++) mags[f*bins+k]=Math.hypot(re[k],im[k]); }
+  // the background level of each band: a low percentile over time (the level it sits at between words)
+  const noise=new Float32Array(bins), col=new Float32Array(frames);
+  for(let k=0;k<bins;k++){ for(let f=0;f<frames;f++) col[f]=mags[f*bins+k]; const s=Float32Array.from(col).sort(); noise[k]=s[Math.floor(frames*.2)]||0; }
+  for(let k=1;k<bins-1;k++) noise[k]=(noise[k-1]+2*noise[k]+noise[k+1])/4;
+  // gains: down where a band is at the background level, up where her voice rises above it
+  const gains=new Float32Array(frames*bins), [over,floor]=strength,  lowCut=Math.round(80/(rate/N));
+  for(let f=0;f<frames;f++) for(let k=0;k<bins;k++){ const m=mags[f*bins+k], snr=m/(noise[k]*over+1e-9);
+    let g=snr<=1?floor:Math.max(floor,1-1/(snr*snr)); if(k<lowCut) g=floor; gains[f*bins+k]=g; }
+  // smooth across pitch bands, then over time (fast up, slower down) so words keep their tails
+  const tmp=new Float32Array(bins);
+  for(let f=0;f<frames;f++){ const o=f*bins; for(let k=0;k<bins;k++){ let s=0,c=0; for(let d=-2;d<=2;d++){ const j=k+d; if(j>=0&&j<bins){ s+=gains[o+j]; c++; } } tmp[k]=s/c; } gains.set(tmp,o); }
+  for(let k=0;k<bins;k++){ let prev=floor; for(let f=0;f<frames;f++){ const i=f*bins+k, g=gains[i]; prev=g>prev?g:prev*.72+g*.28; gains[i]=prev; } }
+  // put it back together (overlap-add)
+  const out=new Float32Array(pad.length), norm=new Float32Array(pad.length);
+  for(let f=0;f<frames;f++){ const o=f*H; for(let i=0;i<N;i++){ re[i]=pad[o+i]*win[i]; im[i]=0; } fft(re,im,false);
+    for(let k=0;k<bins;k++){ const g=gains[f*bins+k]; re[k]*=g; im[k]*=g; if(k>0&&k<N/2){ re[N-k]=re[k]; im[N-k]=-im[k]; } }
+    fft(re,im,true); for(let i=0;i<N;i++){ out[o+i]+=re[i]/N*win[i]; norm[o+i]+=win[i]*win[i]; }
+    if(onProgress&&f%400===0) onProgress(f/frames); }
+  const y=new Float32Array(x.length); for(let i=0;i<x.length;i++) y[i]=norm[i]>1e-6?out[i]/norm[i]:0;
+  return y;
+}
+
+const CLEAN_LVL={light:[2.2,.08],strong:[3,.03],max:[4,.02]};
+const CL={on:false,lvl:'strong',bufs:{},src:null,busy:false,mono:null};
+function cleanReset(){cleanStop();CL.on=false;CL.bufs={};CL.mono=null;CL.busy=false;$('#cleanOn').checked=false;cleanUI()}
+function cleanUI(){$('#cleanLvl').querySelectorAll('button').forEach(b=>{const on=b.dataset.v===CL.lvl;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});$('#cleanLvl').hidden=!CL.on}
+/* the take's sound as one 48 kHz channel */
+async function takeMono(){
+  if(CL.mono)return CL.mono;
+  const dec=await AC.decodeAudioData((await videoBlob.arrayBuffer()).slice(0));
+  const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(dec.duration*48000)),48000);
+  const s=off.createBufferSource();s.buffer=dec;s.connect(off.destination);s.start();
+  return CL.mono=(await off.startRendering()).getChannelData(0);
+}
+async function cleanBuffer(){
+  if(CL.bufs[CL.lvl])return CL.bufs[CL.lvl];
+  const lvl=CL.lvl,x=await takeMono();await new Promise(r=>setTimeout(r,30));
+  const y=cleanVoice(x,48000,CLEAN_LVL[lvl]);
+  const b=AC.createBuffer(1,y.length,48000);b.copyToChannel(y,0);return CL.bufs[lvl]=b;
+}
+function cleanStop(){if(CL.src){try{CL.src.stop()}catch(e){}try{CL.src.disconnect()}catch(e){}CL.src=null}}
+function cleanStart(){
+  cleanStop();const v=$('#play'),b=CL.bufs[CL.lvl];if(!CL.on||!b||!ed||v.paused)return;
+  const s=AC.createBufferSource();s.buffer=b;s.playbackRate.value=v.playbackRate||1;s.connect(ed.vin);s.start(0,Math.min(v.currentTime,b.duration));CL.src=s;
+}
+async function cleanApply(){
+  const hint=$('#cleanHint');
+  if(!CL.on){cleanStop();applyEd();hint.textContent=t('cleanHint');cleanUI();return}
+  cleanUI();if(CL.busy)return;CL.busy=true;hint.textContent=t('cleaning');
+  try{await cleanBuffer();hint.textContent=t('cleanDone')}
+  catch(e){CL.on=false;$('#cleanOn').checked=false;hint.textContent=t('cleanFail');cleanUI()}
+  CL.busy=false;applyEd();cleanStart();
+}
+$('#cleanOn').onchange=()=>{CL.on=$('#cleanOn').checked;ensureAC();cleanApply()};
+$('#cleanLvl').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;CL.lvl=b.dataset.v;cleanStop();cleanApply()});
+/* the cleaned sound follows the video: playing, pausing, seeking, the pause cuts while saving */
+{const v=$('#play');['play','playing','seeked'].forEach(ev=>v.addEventListener(ev,()=>{if(CL.on&&!v.paused)cleanStart()}));
+ ['pause','seeking','ended','emptied'].forEach(ev=>v.addEventListener(ev,cleanStop));}
+
 function setupEditor(){
   const v=$('#play');
   $('#eVol').value=0;$('#eStart').value=0;$('#eEnd').value=0;$('#mVol').value=-14;$('#capsOn').checked=false;$('#tidyOn').checked=false;
-  Object.assign(ES,{caps:false,tidy:false});pick('look','none');pick('size','orig');pick('music',song&&song.src?'song':'none');
+  Object.assign(ES,{caps:false,tidy:false});cleanReset();pick('look','none');pick('size','orig');pick('music',song&&song.src?'song':'none');
   buildCaps();findPauses();edHints();trimMax();paint();
   ensureAC();
   if(gateReady)gateReady.then(ok=>{gateOK=ok;applyEd()});
   try{
     if(!ed){ /* one media source per video element, kept for the session */
       const src=AC.createMediaElementSource(v);const mon=AC.createGain();mon.connect(AC.destination);
-      const mus=AC.createGain();mus.connect(mon);
-      ed={src,mon,music:mus,ch:null};
+      const mus=AC.createGain();mus.connect(mon);const vin=AC.createGain();
+      const hush=AC.createGain();hush.gain.value=0;hush.connect(AC.destination);  /* keeps the video's own sound flowing (silently) so the video keeps time */
+      ed={src,vin,hush,mon,music:mus,ch:null};
     }
     setMusicVol();applyEd();
   }catch(e){ed=null}
@@ -976,11 +1063,12 @@ function setupEditor(){
 }
 function applyEd(){
   if(!ed)return;const e=E();
-  try{ed.src.disconnect()}catch(x){}if(ed.ch)try{ed.ch.out.disconnect()}catch(x){}
-  ed.ch=voiceChain(ed.src,{noise:0,clarity:0,vol:e.vol,level:0});ed.ch.out.connect(ed.mon);
+  try{ed.src.disconnect()}catch(x){}try{ed.vin.disconnect()}catch(x){}if(ed.ch)try{ed.ch.out.disconnect()}catch(x){}
+  ed.src.connect(CL.on?ed.hush:ed.vin);   /* with "Only my voice" the cleaned sound plays instead (cleanStart) */
+  ed.ch=voiceChain(ed.vin,{noise:0,clarity:0,vol:e.vol,level:0});ed.ch.out.connect(ed.mon);
 }
 function downloadBlob(b){const ext=(b.type||'').includes('mp4')?'mp4':'webm';const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='video-'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.'+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
-const isDefault=e=>e.vol===0&&!e.start&&!e.end&&e.look==='none'&&e.music==='none'&&e.size==='orig'&&!e.caps&&!e.tidy;
+const isDefault=e=>!CL.on&&e.vol===0&&!e.start&&!e.end&&e.look==='none'&&e.music==='none'&&e.size==='orig'&&!e.caps&&!e.tidy;
 function roundRect(cx,x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
 /* the same caption box as the preview: 5.5% of the width, 16% from the bottom */
 function drawCap(cx,Wd,Ht,text){
