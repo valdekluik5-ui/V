@@ -25,6 +25,34 @@ button{cursor:pointer}
 .iconbtn{width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:14px;border:1px solid var(--line);background:var(--panel);padding:0}
 .iconbtn svg{width:22px;height:22px}
 
+/* dragon look: the living dragon behind the home and editor screens, its colours on the buttons */
+.dlayer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block}
+.page{z-index:1}
+:root[data-look=dragon]{--bg:#050304;--panel:rgba(16,9,7,.74);--panel2:rgba(28,15,11,.82);--line:rgba(255,190,140,.2);--mist:#9a8a80;--fg:#f6eee9;--muted:#cdbcb2;
+  --rose:var(--acc,#ff7020);--blush:var(--hot,#ffce60);--gold:var(--hot,#ffce60);--ink:#140806}
+[data-look=dragon] .app{background:#000}
+[data-look=dragon] .sky{display:none}
+[data-look=dragon] .card,[data-look=dragon] textarea#text,[data-look=dragon] .helper{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+[data-look=dragon] textarea#text{background:rgba(0,0,0,.62)}
+[data-look=dragon] .new,[data-look=dragon] .pill{box-shadow:0 0 18px color-mix(in srgb,var(--rose) 45%,transparent)}
+[data-look=dragon] .hello h1{text-shadow:0 0 24px color-mix(in srgb,var(--gold) 35%,transparent),0 2px 10px #000}
+[data-look=dragon] .words span.next{text-shadow:0 0 14px color-mix(in srgb,var(--rose) 80%,transparent)}
+[data-look=dragon] .textbox::before{box-shadow:0 0 10px var(--rose)}
+[data-look=dragon] .rec{border-color:var(--gold);box-shadow:0 0 16px var(--rose),inset 0 0 10px color-mix(in srgb,var(--rose) 60%,transparent)}
+[data-look=dragon] .rec i{background:radial-gradient(circle at 40% 35%,var(--gold),var(--rose) 60%,#7a1606)}
+[data-look=dragon] .rec.on{animation:ring 1.6s ease-in-out infinite}
+@keyframes ring{50%{box-shadow:0 0 30px var(--rose),0 0 60px color-mix(in srgb,var(--rose) 40%,transparent)}}
+#dcount{position:absolute;inset:0;width:100%;height:100%;z-index:5;display:block;pointer-events:none;background:#000;transition:opacity 1.4s ease-in}
+#dcount.fade{opacity:0}
+[data-look=dragon] .count{top:auto;height:40%;bottom:6%;color:var(--gold);text-shadow:0 0 30px var(--rose),0 4px 20px #000}
+.looks{position:absolute;z-index:8}
+.looks .sc{font-size:13px;letter-spacing:.16em}
+.lookrow{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.lookrow.cols{grid-template-columns:repeat(3,1fr)}
+.lookrow button{border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:10px 8px;font-weight:700;font-size:13.5px;color:var(--fg);display:flex;gap:7px;align-items:center;justify-content:center}
+.lookrow button[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.lookrow i{width:10px;height:10px;border-radius:50%;flex:none}
+
 /* screen 1: scripts library */
 #home{overflow-y:auto;gap:0}
 .sky{position:absolute;top:0;left:0;width:100%;height:240px;pointer-events:none}
@@ -180,6 +208,16 @@ textarea#text::placeholder{color:var(--mist);font-style:italic}
 </style>
 
 <div class="app">
+  <canvas id="dbg" class="dlayer" hidden aria-hidden="true"></canvas><canvas id="dfire" class="dlayer" hidden aria-hidden="true"></canvas>
+  <!-- look picker: her own Suffler look, or a living dragon -->
+  <div class="panel looks" id="looks" hidden>
+    <div class="sc" data-t="look"></div>
+    <div class="lookrow" id="lookOpts"></div>
+    <div class="sc" id="lookColHead" data-t="colour"></div>
+    <div class="lookrow" id="lookCols"></div>
+    <p class="hint" id="lookHint" data-t="lookHint"></p>
+    <button class="btn" id="looksDone" data-t="ok"></button>
+  </div>
   <!-- 1. scripts library -->
   <section id="home" class="page">
     <svg class="sky" aria-hidden="true" viewBox="0 0 390 240" preserveAspectRatio="xMidYMin slice">
@@ -188,7 +226,7 @@ textarea#text::placeholder{color:var(--mist);font-style:italic}
       <circle class="tw" cx="190" cy="196" r="1.1" fill="#ffd9e8"/><circle class="tw d2" cx="28" cy="210" r="1" fill="#f0c97a"/><circle class="tw d3" cx="368" cy="30" r="1.2" fill="#ffd9e8"/>
     </svg>
     <div class="hello">
-      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v19</span><button class="chip" id="lang">EN</button></div>
+      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v20</span><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
       <h1 id="greet"></h1>
       <div class="season" id="season"></div>
       <p data-t="ask"></p>
@@ -246,6 +284,7 @@ textarea#text::placeholder{color:var(--mist);font-style:italic}
       <button class="mode glass" id="mode"></button>
       <button class="round glass" id="settings" data-ta="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
     </div>
+    <canvas id="dcount" hidden aria-hidden="true"></canvas>
     <div class="count" id="count" hidden></div>
 
     <div class="panel" id="panel" hidden>
@@ -336,11 +375,13 @@ const T={
   save:'Зберегти відео',again:'Записати ще раз',savedHint:'Збережено в папку «Завантаження».',noVideo:'Камери немає, тому нічого не записано. Це була репетиція.',
   sample:'Привіт! Сьогодні я покажу вам три прості звички, які змінили мій ранок.\n\nПерша — склянка води одразу після пробудження. Звучить банально, але вона будить мене швидше за каву.\n\nДруга — п’ять хвилин без телефону. Я сиджу біля вікна і думаю, що для мене важливо сьогодні.\n\nА третя — записати одну річ, яку я зроблю до обіду. Тільки одну.\n\nНапишіть у коментарях, яка звичка вам подобається найбільше, і підписуйтесь!'}
 };
-Object.assign(T.en,{ph:'Write or paste what you will say…',morning:'Good morning',day:'Good afternoon',evening:'Good evening',ask:'What will you say to the camera today?',newScript:'New script',quick:'Record the latest script',yours:'YOUR SCRIPTS',nScripts:n=>n===1?'1 script':n+' scripts',
+Object.assign(T.en,{look:'Look',colour:'Colour',lookSuffler:'Suffler',lookLava:'Lava dragon',lookFrost:'Frost dragon',lookBronze:'Bronze dragon',lookHint:'The dragon lives behind your scripts and wakes up as the countdown before you record. Your video is not changed.',cOwn:'Picture’s own',cCycle:'Changing',cFire:'Fire',cCrimson:'Crimson',cGold:'Gold',cJade:'Jade',cFrost:'Frost',cViolet:'Violet',cSteel:'Steel',
+  ph:'Write or paste what you will say…',morning:'Good morning',day:'Good afternoon',evening:'Good evening',ask:'What will you say to the camera today?',newScript:'New script',quick:'Record the latest script',yours:'YOUR SCRIPTS',nScripts:n=>n===1?'1 script':n+' scripts',
   empty:'No scripts yet. Start a new one above.',ready:'Ready',draft:'Draft',takes:n=>n===1?'1 take':n+' takes',untitled:'Untitled script',scripts:'Back to scripts',record:'Record',del:'Delete script',delAsk:'Delete this script?',take:'Take',practice:'Practice run',toScript:'Back to script',sampleTitle:'Morning habits',oracle:'THE ORACLE',signs:['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'],seasonOf:n=>n+' season',
   use:'Use this',another:'Try another',close:'Close',cHook:'Stronger hook',cShorter:'Make it shorter',cWarmer:'Warmer tone',cTrans:'In Ukrainian',cFix:'Fix mistakes',askPh:'Ask: write a script about…',send:'Send',undo:'Undo',thinking:'The stars are reading…',forHook:'for the first line',forAll:'for the whole script',forNew:'a new script',aiNet:'No internet connection, or Gemini could not be reached.',aiFail:'The oracle could not answer. Try again in a moment.',aiBusy:'Gemini’s free limit is used up for now. Try again later, or ask ChatGPT instead.',aiBadKey:'This Gemini key does not work. Copy it again and paste it here.',keyTitle:'Connect the oracle to Gemini. It is free.',keyHow:'1. Open Google AI Studio and sign in with Google.\n2. Tap “Create API key” and copy it.\n3. Paste it below. The key stays only on this phone.',keyLink:'Open Google AI Studio ↗',keyPh:'Paste your Gemini key',gptBtn:'Ask ChatGPT instead',keyBtn:'Gemini key',gptSay:'Your request is copied and ChatGPT is opening. If the question is not there, paste it. Then copy ChatGPT’s answer and paste it here.',gptPh:'Paste ChatGPT’s answer',paste:'Paste',aiRefused:'The oracle cannot help with this one.',
   tTrim:'Trim',tCaps:'Captions',tLook:'Filter',tMusic:'Music',tTidy:'Pauses',tSound:'Sound',capsOn:'Show captions',capsHint:'Made from your script, timed to your voice.',capsNone:'No word timing for this take, so no captions.',lNone:'Natural',lWarm:'Warm',lSoft:'Soft',lMono:'Black & white',lMoon:'Midnight',mNone:'No music',mPad:'Starlight pad',mSong:'Your song…',mVol:'Music volume',tidyOn:'Remove pauses',tidyHint:(n,s)=>`Found ${n} ${n===1?'pause':'pauses'}, ${s} s in total.`,tidyNone:'No long pauses found.',sOrig:'Original',s916:'9:16 vertical',notePauses:(n,s)=>`The oracle found ${n} ${n===1?'pause':'pauses'} (${s} s) you can remove.`,noteCaps:'Captions are ready.'});
-Object.assign(T.uk,{ph:'Напиши або встав те, що скажеш…',morning:'Доброго ранку',day:'Добрий день',evening:'Добрий вечір',ask:'Що скажеш камері сьогодні?',newScript:'Новий сценарій',quick:'Записати останній сценарій',yours:'ТВОЇ СЦЕНАРІЇ',nScripts:n=>n+' '+plural(n,'сценарій','сценарії','сценаріїв'),
+Object.assign(T.uk,{look:'Вигляд',colour:'Колір',lookSuffler:'Suffler',lookLava:'Лавовий дракон',lookFrost:'Крижаний дракон',lookBronze:'Бронзовий дракон',lookHint:'Дракон живе за твоїми сценаріями і прокидається під час відліку перед записом. Саме відео не змінюється.',cOwn:'Як на картинці',cCycle:'Мінливий',cFire:'Вогонь',cCrimson:'Багряний',cGold:'Золотий',cJade:'Нефритовий',cFrost:'Крижаний',cViolet:'Фіолетовий',cSteel:'Сталевий',
+  ph:'Напиши або встав те, що скажеш…',morning:'Доброго ранку',day:'Добрий день',evening:'Добрий вечір',ask:'Що скажеш камері сьогодні?',newScript:'Новий сценарій',quick:'Записати останній сценарій',yours:'ТВОЇ СЦЕНАРІЇ',nScripts:n=>n+' '+plural(n,'сценарій','сценарії','сценаріїв'),
   empty:'Сценаріїв ще немає. Почни новий вище.',ready:'Готово',draft:'Чернетка',takes:n=>n+' '+plural(n,'дубль','дублі','дублів'),untitled:'Без назви',scripts:'До сценаріїв',record:'Запис',del:'Видалити сценарій',delAsk:'Видалити цей сценарій?',take:'Дубль',practice:'Репетиція',toScript:'До сценарію',sampleTitle:'Ранкові звички',oracle:'ОРАКУЛ',signs:['Овен','Телець','Близнюки','Рак','Лев','Діва','Терези','Скорпіон','Стрілець','Козеріг','Водолій','Риби'],seasonOf:n=>'Сезон: '+n,
   use:'Взяти',another:'Інший варіант',close:'Закрити',cHook:'Сильніший початок',cShorter:'Коротше',cWarmer:'Тепліше',cTrans:'Англійською',cFix:'Виправити помилки',askPh:'Попроси: напиши сценарій про…',send:'Надіслати',undo:'Повернути',thinking:'Зорі читають…',forHook:'для першого речення',forAll:'для всього сценарію',forNew:'новий сценарій',aiNet:'Немає інтернету або Gemini недоступний.',aiFail:'Оракул не зміг відповісти. Спробуй ще раз.',aiBusy:'Безкоштовний ліміт Gemini поки вичерпано. Спробуй пізніше або запитай ChatGPT.',aiBadKey:'Цей ключ Gemini не працює. Скопіюй його ще раз і встав сюди.',keyTitle:'Підключи оракула до Gemini. Це безкоштовно.',keyHow:'1. Відкрий Google AI Studio і увійди через Google.\n2. Натисни «Create API key» і скопіюй ключ.\n3. Встав його нижче. Ключ зберігається лише на цьому телефоні.',keyLink:'Відкрити Google AI Studio ↗',keyPh:'Встав ключ Gemini',gptBtn:'Запитати ChatGPT',keyBtn:'Ключ Gemini',gptSay:'Запит скопійовано, ChatGPT відкривається. Якщо питання немає, встав його. Потім скопіюй відповідь ChatGPT і встав сюди.',gptPh:'Встав відповідь ChatGPT',paste:'Вставити',aiRefused:'З цим оракул допомогти не може.',
   tTrim:'Обрізка',tCaps:'Субтитри',tLook:'Фільтр',tMusic:'Музика',tTidy:'Паузи',tSound:'Звук',capsOn:'Показати субтитри',capsHint:'Зі сценарію, у темпі твого голосу.',capsNone:'Для цього дубля немає таймінгу слів, тож субтитрів немає.',lNone:'Природний',lWarm:'Теплий',lSoft:'Ніжний',lMono:'Чорно-білий',lMoon:'Опівніч',mNone:'Без музики',mPad:'Зоряний фон',mSong:'Твоя пісня…',mVol:'Гучність музики',tidyOn:'Прибрати паузи',tidyHint:(n,s)=>`Знайдено ${n} ${plural(n,'паузу','паузи','пауз')}, разом ${s} с.`,tidyNone:'Довгих пауз немає.',sOrig:'Оригінал',s916:'9:16 вертикально',notePauses:(n,s)=>`Оракул знайшов ${n} ${plural(n,'паузу','паузи','пауз')} (${s} с), які можна прибрати.`,noteCaps:'Субтитри готові.'});
@@ -376,7 +417,7 @@ const stats=text=>{const n=tokenize(text).filter(w=>w.n).length,sec=Math.round(n
 const titleOf=s=>s.title.trim()||(s.text.trim().split('\n')[0].split(/\s+/).slice(0,6).join(' '))||t('untitled');
 
 let back='write';
-function screen(id){['home','write','shoot'].forEach(x=>$('#'+x).hidden=x!==id)}
+function screen(id){['home','write','shoot'].forEach(x=>$('#'+x).hidden=x!==id);if(typeof dragonLook!=='undefined'&&dragonLook)dragonLook.screen(id)}
 function greeting(){const h=new Date().getHours();return t(h>=5&&h<12?'morning':h>=12&&h<18?'day':'evening')}
 const ZOD=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'].map(g=>g+'\uFE0E'); /* text style, not emoji */
 /* sun sign of a date: index into ZOD (Aries = 0); each sign starts on these days of its month */
@@ -751,7 +792,7 @@ $('#rec').onclick=async()=>{
   ensureAC();if(gateReady)gateReady.then(ok=>gateOK=ok);
   $('#panel').hidden=true;
   if(pos()>=W.length)resetPos();
-  const c=$('#count');c.hidden=false;for(const n of[3,2,1]){c.textContent=n;await new Promise(r=>setTimeout(r,800))}c.hidden=true;
+  const c=$('#count');c.hidden=false;const dz=dragonLook&&dragonLook.countStart();for(const n of[3,2,1]){c.textContent=n;if(n===1&&dz)dragonLook.breathe();await new Promise(r=>setTimeout(r,800))}c.hidden=true;if(dz)dragonLook.countEnd();
   elapsed=0;running=true;paused=false;chunks=[];rec=null;useAuto=S.mode==='auto';fpos=shown;syncVoice();
   take={t0:performance.now(),wt:[],lv:[],last:shown,auto:useAuto};take.wt[shown]=0;
   if(stream){const m=mime();if(m!==null){try{const rs=recordStream();rec=new MediaRecorder(rs,Object.assign({videoBitsPerSecond:6000000,audioBitsPerSecond:128000},m?{mimeType:m}:{}));rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};rec.start(500)}catch(e){rec=null}}}
@@ -1013,5 +1054,336 @@ $('#vtest').onclick=()=>{
 };
 applyLang();look();
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(spans.length)computeLines()});
+
+/* ---------- dragon look: a living dragon (from the Dragon app) behind the screens and as the countdown ----------
+   Her own look stays the default; S.look picks 'suffler', 'lava', 'frost' or 'bronze', S.dcol the colour. */
+var dragonLook=(S2=>{
+  const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches; let SK='crimson', cur=0;
+  const S={dragon:{lock:'living',bg:'living',pic:'lava',colour:'own',cycleCols:['fire','crimson','gold','jade','frost','violet','steel'],hold:20,fade:4,perPage:false,v2:1}};
+/* ---------- living dragon: the dragon picture with live eyes, for the lock screen and as a background ----------
+   The painted pupils were removed from the pictures (see lab/); the shader draws its own pupils so they can move.
+   Eye boxes are in picture pixels: centre x, centre y, half width, half height; pupils: centre x, y, angle, length. */
+const LIVE_PICS={
+  lava:{src:'dragons/lava.jpg',mask:'dragons/lava-mask.png',w:842,h:1264,eL:[320,477,30,24],eR:[545,483,30,24],pL:[323,481,1.75,26],pR:[542,483,1.72,26],tL:.5,tR:-.5,glow:[1,.45,.1],smoke:[.45,.45,.5],cracks:true,drift:true},
+  frost:{src:'dragons/frost.jpg',mask:'dragons/frost-mask.png',breathSrc:'dragons/frost-breath.jpg',w:842,h:1264,eL:[317,476,30,24],eR:[546,478,30,24],pL:[319,481,1.64,30],pR:[545.5,480,1.78,28],tL:.5,tR:-.5,glow:[.35,.75,1],smoke:[.5,.6,.72],cracks:true,breath:[382,706,482,702]},
+  bronze:{src:'dragons/bronze.jpg',mask:'dragons/bronze-mask.png',w:842,h:1264,eL:[318,476,30,22],eR:[543,479,30,22],pL:[320.3,477.5,1.6,24],pR:[544.2,478,1.74,32],tL:.5,tR:-.5,glow:[.25,1,.55],smoke:[.52,.6,.58],cracks:true}
+};
+/* colours for the eyes, their glow, the flames and the embers: hot, middle and deep */
+const LIVE_COLS={
+  cycle:{name:'Changing'}, own:{name:'Picture’s own'}, page:{name:'Page colours'},
+  fire:{name:'Fire',hot:[255,206,96],mid:[255,112,26],deep:[196,34,8]},
+  crimson:{name:'Crimson',hot:[255,170,140],mid:[232,40,30],deep:[140,0,12]},
+  gold:{name:'Gold',hot:[255,236,170],mid:[240,176,56],deep:[160,84,10]},
+  jade:{name:'Jade',hot:[190,255,190],mid:[50,220,110],deep:[8,120,50]},
+  frost:{name:'Frost',hot:[220,245,255],mid:[80,180,255],deep:[20,70,170]},
+  violet:{name:'Violet',hot:[240,205,255],mid:[170,80,255],deep:[80,20,160]},
+  steel:{name:'Steel',hot:[255,255,255],mid:[200,210,225],deep:[90,100,120]}
+};
+const PAGE_LIVE={crimson:'crimson',frost:'frost',steel:'steel',jade:'jade',ember:'fire',terminal:'jade'};
+const CYCLE_ALL=['fire','crimson','gold','jade','frost','violet','steel'];
+const DRAGON_DEF={lock:'living',bg:'living',pic:'fire',colour:'cycle',cycleCols:CYCLE_ALL,hold:20,fade:4,perPage:true};
+/* 6.3 makes changing colours and the living background the default once; later choices are kept (the flag syncs with them) */
+if(!S.dragon||!S.dragon.v2){ S.dragon={...(S.dragon||{}),colour:'cycle',bg:'living',v2:1}; try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+const dragonOpt=()=>({...DRAGON_DEF,...(S.dragon||{})});
+/* colour key for the lock screen or the background; "page colours" follow the page look on the background only */
+/* changing colours: the lock screen and each page show different colours from a random order of the chosen ones, timed by the
+   clock so the phone and the computer match; each colour stays for "hold" seconds, then fades into the next */
+const fract=v=>v-Math.floor(v);
+function cyclePalette(slot){
+  const o=dragonOpt(), picked=(o.cycleCols||[]).filter(k=>LIVE_COLS[k]&&LIVE_COLS[k].mid), list=picked.length?picked:CYCLE_ALL, n=list.length;
+  const hold=Math.max(1,+o.hold||20), fade=Math.max(.1,+o.fade||4), P=hold+fade, t=Date.now()/1000, step=Math.floor(t/P), ph=t-step*P;
+  // one random order for everyone; each page is a step further along it, so pages differ while there are enough colours
+  const sl=o.perPage?slot:0, raw=k=>Math.floor(fract(Math.sin(k*12.9898)*43758.5453)*n);
+  const at=k=>{ let i=raw(k); if(n>1&&i===raw(k-1)) i=(i+1)%n; return LIVE_COLS[list[(i+sl)%n]]; };
+  const A=at(step), B=at(step+1), e=ph<hold?0:.5-.5*Math.cos(Math.PI*(ph-hold)/fade), mix=(a,b)=>a.map((v,i)=>Math.round(v+(b[i]-v)*e));
+  return {hot:mix(A.hot,B.hot),mid:mix(A.mid,B.mid),deep:mix(A.deep,B.deep)};
+}
+/* the colours for the lock screen or the background right now; null keeps the picture's own */
+function livePalette(where){ let k=dragonOpt().colour;
+  if(k==='cycle') return cyclePalette(where==='bg'?Math.max(0,cur)+1:0);
+  if(k==='page') k=where==='bg'?PAGE_LIVE[SK]||'own':'own';
+  return LIVE_COLS[k]&&LIVE_COLS[k].mid?LIVE_COLS[k]:null; }
+function firePalette(where){ const pic=dragonOpt().pic; return livePalette(where)||LIVE_COLS[pic==='bronze'?'gold':pic==='frost'?'frost':'fire']; }
+const LIVE_FS=`precision highp float;
+uniform sampler2D T, M, T2; uniform float breathAge; uniform vec2 res, img, off; uniform float scale, t, blink, flare, pulse;
+uniform float edge, sideSmoke, recolor, crackOn, breath, driftOn; uniform vec4 nose;
+uniform vec3 rDeep, rMid, rHot;
+uniform vec4 eL, eR, pL, pR; uniform float pupil; uniform float tL, tR; uniform vec2 gaze; uniform vec3 glow, smokeTint; uniform float dimAmt;
+
+float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
+float noise(vec2 p){ vec2 i=floor(p), f=fract(p), u=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }
+float fbm(vec2 p){ float v=0.0, a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p=p*2.03+vec2(1.7,9.2); a*=0.5; } return v; }
+bool inside(vec2 uv){ return uv.x>=0.0&&uv.y>=0.0&&uv.x<=1.0&&uv.y<=1.0; }
+vec3 tex(vec2 ip){ vec2 uv=ip/img; if(uv.y<0.0||uv.y>1.0) return vec3(0.0);
+  uv.x=uv.x<0.0?-uv.x:(uv.x>1.0?2.0-uv.x:uv.x); return texture2D(T,clamp(uv,0.0,1.0)).rgb; }   // mirrored past the sides
+float msk(vec2 ip){ vec2 uv=ip/img; return inside(uv)?texture2D(M,uv).r:0.0; }
+
+/* one eye: fire flicker, gaze, blink and glow; returns the new colour */
+vec3 eye(vec3 col, vec2 ip, vec4 e, float tilt, vec4 pu, float side, inout vec3 add){
+  vec2 d=ip-e.xy; float c=cos(tilt), s=sin(tilt);
+  vec2 n=vec2(c*d.x+s*d.y,-s*d.x+c*d.y)/e.zw;              // ellipse space, y down
+  float r=length(n);
+  float closedness=blink;
+  add+=glow*exp(-r*1.5)*(0.07+0.1*pulse+0.3*flare)*(1.0-0.85*closedness);
+  if(r>1.6) return col;
+  float m=msk(ip);
+  if(recolor>0.5){ float mx=max(col.r,max(col.g,col.b)), mn=min(col.r,min(col.g,col.b)), lum=dot(col,vec3(0.3,0.59,0.11));
+    float halo=smoothstep(2.4,1.0,r)*(1.0-m)*clamp((mx-mn)*3.0,0.0,1.0);
+    col=mix(col,lum*1.7*rMid/max(rMid.r,max(rMid.g,rMid.b)),halo); }
+  // halo dims while the eye is shut
+  col*=1.0-0.55*closedness*smoothstep(1.6,0.9,r)*(1.0-m);
+  if(m<0.01) return col;
+  vec3 ec=col;
+  if(recolor>0.5){ float v=max(ec.r,max(ec.g,ec.b))*0.65+dot(ec,vec3(0.3,0.59,0.11))*0.5;
+    vec3 rc=mix(vec3(0.0),rDeep,smoothstep(0.05,0.35,v)); rc=mix(rc,rMid,smoothstep(0.3,0.6,v)); rc=mix(rc,rHot,smoothstep(0.55,0.85,v)); rc=mix(rc,vec3(1.0,0.98,0.94),smoothstep(0.88,1.05,v));
+    ec=rc; }
+  float fl=0.78+0.5*fbm(n*2.6+vec2(t*0.35*side,-t*0.55)+fbm(n*3.0-t*0.2));
+  ec*=fl*(1.0+0.4*flare+0.12*pulse);
+  ec+=glow*0.35*smoothstep(0.62,0.85,fbm(n*4.0+vec2(-t*0.5,t*0.3)))*m;
+  // the slit pupil (the painted one was removed from the picture): upright, pointed, with a dark soft core,
+  // a burning rim and a shadow around it; it follows the gaze, widens and narrows, and quivers slightly
+  vec2 pp=ip-(pu.xy+gaze*vec2(e.z*0.28,e.w*0.2));
+  float pa=pu.z, cu=cos(pa), su=sin(pa), u=e.z/40.0;
+  float pl=pp.x*cu+pp.y*su, pwc=-pp.x*su+pp.y*cu;
+  float Lh=e.w*1.1, k=clamp(1.0-abs(pl)/Lh,0.0,1.0), shape=pow(k,0.7);
+  float quiver=1.0+0.07*sin(t*1.9+side)+0.04*sin(t*4.3+side*2.0);
+  float hw=u*(1.6+3.8*pupil)*quiver*shape;
+  float pd=(abs(pwc)-hw)/u;
+  ec*=1.0-0.5*exp(-max(pd,0.0)*0.45)*step(abs(pl),Lh*1.15);
+  ec+=glow*0.75*exp(-abs(pd)*0.9)*k;
+  float core=smoothstep(0.7,-1.3,pd)*step(abs(pl),Lh);
+  vec3 pc=mix(vec3(0.012,0.004,0.003),glow*0.1,smoothstep(-2.5,0.4,pd));
+  ec=mix(ec,pc,core);
+  ec+=vec3(1.0,0.95,0.85)*0.35*smoothstep(1.2,0.0,length(vec2(pwc/u+0.35*hw/u,(pl+Lh*0.35)/(u*2.2))))*core;
+  col=mix(col,ec,m);
+  // eyelids: the upper lid comes down, the lower lid comes up a little
+  float E=sqrt(max(0.0,1.0-n.x*n.x))*1.15;
+  float upper=-E+1.5*E*closedness, lower=E-0.55*E*closedness;
+  float cover=max(smoothstep(upper+0.05,upper-0.05,n.y),smoothstep(lower-0.05,lower+0.05,n.y))*step(0.001,closedness);
+  vec3 lid=tex(ip-vec2(0.0,e.w*2.4))*0.6;
+  col=mix(col,lid,cover*smoothstep(0.0,0.25,m));
+  col+=glow*exp(-abs(n.y-upper)*28.0)*m*step(0.02,closedness)*(1.0-cover)*0.8;
+  return col;
+}
+
+void main(){
+  vec2 s=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y);
+  vec2 ip=(s-off)/scale, uv=ip/img;
+  vec3 col=tex(ip);
+  float outX=max(-uv.x,uv.x-1.0), edgeX=smoothstep(edge,0.0,outX);
+  col*=edgeX*smoothstep(1.0,0.9,uv.y);
+  // the picture's own smoke rises slowly and curls (two phases blended, so it never jumps back)
+  if(driftOn>0.5){ float sm=inside(uv)?texture2D(M,uv).b:0.0;
+    if(sm>0.01){ vec2 q=ip/img.y*3.2;
+      vec2 curl=(vec2(fbm(q+vec2(t*0.06,0.0)),fbm(q+vec2(5.2,1.3)-vec2(0.0,t*0.05)))-0.5)*34.0;
+      float p1=fract(t*0.045), p2=fract(t*0.045+0.5), w1=1.0-abs(2.0*p1-1.0);
+      vec2 ua=(ip+vec2(0.0,p1*46.0)+curl*(0.6+0.4*p1))/img, ub=(ip+vec2(0.0,p2*46.0)+curl*(0.6+0.4*p2))/img;
+      vec4 a=inside(ua)?vec4(texture2D(T,ua).rgb,texture2D(M,ua).b):vec4(0.0), b=inside(ub)?vec4(texture2D(T,ub).rgb,texture2D(M,ub).b):vec4(0.0);
+      vec4 mv=a*w1+b*(1.0-w1);
+      col=mix(col,mv.rgb*edgeX*smoothstep(1.0,0.9,uv.y),sm*clamp(mv.a*1.4,0.0,1.0)); } }
+  vec3 add=vec3(0.0);
+  col=eye(col,ip,eL,tL,pL,-1.0,add);
+  col=eye(col,ip,eR,tR,pR,1.0,add);
+  col+=add;
+  // breath: the real smoke from the breath picture, pouring out of the nostrils and streaming outward
+  if(breath>0.01){ vec2 nn=ip.x<(nose.x+nose.z)*0.5?nose.xy:nose.zw, fd=ip-nn; float dist=length(fd); vec2 dir=fd/max(dist,1.0);
+    float L=min(60.0,dist*0.45), p1=fract(t*0.16), p2=fract(t*0.16+0.5), w1=1.0-abs(2.0*p1-1.0);
+    vec2 ua=(ip-dir*p1*L)/img, ub=(ip-dir*p2*L)/img;
+    vec4 sa=inside(ua)?vec4(texture2D(T2,ua).rgb,texture2D(M,ua).b):vec4(0.0), sb=inside(ub)?vec4(texture2D(T2,ub).rgb,texture2D(M,ub).b):vec4(0.0);
+    vec4 sm=sa*w1+sb*(1.0-w1);
+    float reach=breathAge*240.0, grow=smoothstep(reach,reach-110.0,dist);
+    vec3 sc=recolor>0.5?mix(sm.rgb,sm.rgb*rHot/max(rHot.b,max(rHot.r,rHot.g)),0.35):sm.rgb;
+    col=mix(col,sc,clamp(sm.a,0.0,1.0)*grow*breath); }
+  // glowing cracks: light pulses outward from between the eyes through the cracks
+  if(crackOn>0.5){ float ck=inside(uv)?texture2D(M,uv).g:0.0;
+    if(ck>0.01){ float d=length(ip-(eL.xy+eR.xy)*0.5)/img.y, wave=0.5+0.5*sin(t*1.7-d*26.0);
+      vec3 cc=recolor>0.5?rHot:vec3(1.0,0.74,0.32);
+      col+=cc*ck*(0.25+0.75*wave*wave)*(0.75+0.25*pulse+0.8*flare)*(1.0-0.6*blink)*0.6; } }
+  // drifting smoke, heavier low down and at the sides
+  vec2 sp=s/res.y*2.2;
+  float sm=fbm(sp*1.3+vec2(t*0.035,-t*0.05)+0.8*fbm(sp*2.1+vec2(-t*0.02,t*0.03)));
+  float where=0.12+0.35*smoothstep(0.35,1.0,s.y/res.y)+sideSmoke*(1.0-edgeX)*smoothstep(0.0,0.5,abs(s.x/res.x-0.5)+0.2);
+  vec3 smoke=smokeTint*smoothstep(0.42,0.9,sm)*where;
+  col=1.0-(1.0-col)*(1.0-smoke);
+  col*=smoothstep(1.4,0.45,length((s/res-0.5)*vec2(1.0,1.3)));
+  col*=1.0-dimAmt;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+function livingDragon(canvas,opt){
+  let g=null, U={}, P=null, picKey='', whereKey='bg', raf=0, on=false, last=0, ready=false, failed=false;
+  const st={p:.5,blinkT:-1,nextBlink:2+Math.random()*3,gx:0,gy:0,tx:0,ty:0,nextSac:1,flare:0,ptr:false,k:0,wake:1,breath:0,breathTo:0,breathAge:0};
+  const load=src=>new Promise((ok,bad)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=bad; i.src=src; });
+  function init(){
+    try{ g=canvas.getContext('webgl',{antialias:false}); }catch(e){ g=null; }
+    if(!g) return false;
+    const sh=(type,src)=>{ const s=g.createShader(type); g.shaderSource(s,src); g.compileShader(s); return g.getShaderParameter(s,g.COMPILE_STATUS)?s:null; };
+    const vs=sh(g.VERTEX_SHADER,'attribute vec2 a; void main(){ gl_Position=vec4(a,0.0,1.0); }'), fs=sh(g.FRAGMENT_SHADER,LIVE_FS);
+    if(!vs||!fs) return false;
+    const pr=g.createProgram(); g.attachShader(pr,vs); g.attachShader(pr,fs); g.linkProgram(pr); if(!g.getProgramParameter(pr,g.LINK_STATUS)) return false; g.useProgram(pr);
+    g.bindBuffer(g.ARRAY_BUFFER,g.createBuffer()); g.bufferData(g.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),g.STATIC_DRAW);
+    const al=g.getAttribLocation(pr,'a'); g.enableVertexAttribArray(al); g.vertexAttribPointer(al,2,g.FLOAT,false,0,0);
+    ['T','M','res','img','off','scale','t','blink','flare','pulse','eL','eR','tL','tR','gaze','glow','smokeTint','edge','sideSmoke','recolor','rDeep','rMid','rHot','pL','pR','pupil','dimAmt','crackOn','breath','nose','T2','breathAge','driftOn'].forEach(n=>U[n]=g.getUniformLocation(pr,n));
+    g.uniform1i(U.T,0); g.uniform1i(U.M,1); g.uniform1i(U.T2,2);
+    return true;
+  }
+  function tex(unit,im){ const t=g.createTexture(); g.activeTexture(g.TEXTURE0+unit); g.bindTexture(g.TEXTURE_2D,t);
+    [[g.TEXTURE_MIN_FILTER,g.LINEAR],[g.TEXTURE_MAG_FILTER,g.LINEAR],[g.TEXTURE_WRAP_S,g.CLAMP_TO_EDGE],[g.TEXTURE_WRAP_T,g.CLAMP_TO_EDGE]].forEach(([k,v])=>g.texParameteri(g.TEXTURE_2D,k,v));
+    g.texImage2D(g.TEXTURE_2D,0,g.RGBA,g.RGBA,g.UNSIGNED_BYTE,im); }
+  async function use(pic){ if(pic===picKey) return; picKey=pic; ready=false;
+    const D=LIVE_PICS[pic]; try{ const [im,mk,br]=await Promise.all([load(D.src),load(D.mask),D.breathSrc?load(D.breathSrc):null]); if(picKey!==pic) return; tex(0,im); tex(1,mk); if(br){ tex(2,br); D.breathReady=true; } P=D; ready=true; }catch(e){} }
+  function draw(t){
+    if(!ready||!on) return; const dpr=Math.min(opt.maxDpr,devicePixelRatio||1);
+    const W=Math.max(1,Math.round(canvas.clientWidth*dpr)), H=Math.max(1,Math.round(canvas.clientHeight*dpr)); if(canvas.width!==W||canvas.height!==H){ canvas.width=W; canvas.height=H; } g.viewport(0,0,W,H);
+    // tall screens: cover; wide screens: fit the height, eyes about 40% down, sides mirrored into smoke
+    const wide=H<W*1.15; let sc,ox,oy;
+    if(!wide){ sc=Math.max(W/P.w,H/P.h); ox=(W-P.w*sc)/2; oy=(H-P.h*sc)/2; } else { sc=H/P.h*1.3; ox=(W-P.w*sc)/2; oy=H*.4-P.eL[1]*sc; }
+    const C=livePalette(whereKey), own=!C, f=v=>v.map(c=>c/255);
+    g.uniform2f(U.res,W,H); g.uniform2f(U.img,P.w,P.h); g.uniform2f(U.off,ox,oy); g.uniform1f(U.scale,sc);
+    g.uniform1f(U.edge,wide?.3:.01); g.uniform1f(U.sideSmoke,wide?.55:.1); g.uniform1f(U.dimAmt,opt.dim);
+    g.uniform1f(U.t,t); g.uniform1f(U.blink,st.k); g.uniform1f(U.flare,st.flare); g.uniform1f(U.pulse,.5+.5*Math.sin(t*1.1)); g.uniform1f(U.pupil,st.p);
+    g.uniform4fv(U.eL,P.eL); g.uniform4fv(U.eR,P.eR); g.uniform4fv(U.pL,P.pL); g.uniform4fv(U.pR,P.pR); g.uniform1f(U.tL,P.tL); g.uniform1f(U.tR,P.tR); g.uniform1f(U.crackOn,P.cracks?1:0); g.uniform1f(U.driftOn,P.drift?1:0); g.uniform1f(U.breath,P.breath&&P.breathReady?st.breath:0); if(P.breath){ g.uniform4fv(U.nose,P.breath); g.uniform1f(U.breathAge,st.breathAge); }
+    g.uniform1f(U.recolor,own?0:1); if(!own){ g.uniform3fv(U.rDeep,f(C.deep)); g.uniform3fv(U.rMid,f(C.mid)); g.uniform3fv(U.rHot,f(C.hot)); }
+    g.uniform2f(U.gaze,st.gx,st.gy); g.uniform3fv(U.glow,own?P.glow:f(C.mid)); g.uniform3fv(U.smokeTint,P.smoke);
+    g.drawArrays(g.TRIANGLES,0,3);
+  }
+  /* waking up: the eyes stay shut a moment, then open once, slowly and smoothly */
+  const ease=x=>.5-.5*Math.cos(Math.PI*Math.max(0,Math.min(1,x)));
+  const sleepy=w=>w<.1?1:1-ease((w-.1)/.9);
+  function update(t,dt){
+    st.breath+=(st.breathTo-st.breath)*Math.min(1,dt*1.4);   // the breath swells in smoothly
+    st.breathAge=st.breathTo?st.breathAge+dt:0;
+    if(st.wake<1){ st.k=sleepy(st.wake); st.p+=(.95-st.p)*Math.min(1,dt*3); st.nextBlink=t+3+Math.random()*4; st.tx=st.ty=0;
+      const s=Math.min(1,dt*4); st.gx+=(0-st.gx)*s; st.gy+=(0-st.gy)*s; return; }
+    let k=0; if(t>st.nextBlink&&st.blinkT<0) st.blinkT=0;
+    if(st.blinkT>=0){ st.blinkT+=dt; const b=st.blinkT; k=b<.14?b/.14:b<.48?.5+.5*Math.cos(Math.PI*(b-.14)/.34):0; if(b>=.48){ st.blinkT=-1; st.nextBlink=t+opt.blinkMin+Math.random()*opt.blinkVar; } }
+    st.k=k;
+    if(!st.ptr&&t>st.nextSac){ const home=Math.random()<.4; st.tx=home?0:(Math.random()*2-1)*.8; st.ty=home?0:(Math.random()*2-1)*.45; st.nextSac=t+.9+Math.random()*2.8; }
+    const s=Math.min(1,dt*10); st.gx+=(st.tx-st.gx)*s; st.gy+=(st.ty-st.gy)*s;
+    st.flare=Math.max(0,st.flare-dt*1.1);
+    const pt=(.5+.2*Math.sin(t*.45)-(st.ptr?.15:0))*(1-st.flare*.8); st.p+=(pt-st.p)*Math.min(1,dt*5);
+  }
+  function step(now){ if(!on) return; raf=requestAnimationFrame(step);
+    if(last&&now-last<1000/opt.fps-2) return; const raw=last?(now-last)/1000:0, dt=Math.min(.1,raw); last=now;
+    if(st.wake<1) st.wake=Math.min(1,st.wake+Math.min(.5,raw)/opt.wakeSecs);   // waking follows the clock even on a slow device
+    update(now/1000,dt); draw(now/1000); }
+  return {
+    /* returns false when this device can't draw it, so the caller keeps the original look */
+    start(pic,where){
+      if(failed) return false;
+      if(!g&&!init()){ failed=true; return false; }
+      whereKey=where; canvas.hidden=false;
+      if(!on){ on=true; last=0; if(!reduceMotion) raf=requestAnimationFrame(step); }
+      use(pic).then(()=>{ if(reduceMotion){ st.k=0; draw(1.5); } });
+      if(reduceMotion&&ready) draw(1.5);
+      return true;
+    },
+    stop(){ on=false; cancelAnimationFrame(raf); canvas.hidden=true; },
+    point(e){ const r=canvas.getBoundingClientRect(); if(!r.width) return; st.tx=Math.max(-1,Math.min(1,(e.clientX-r.left)/r.width*2-1))*1.2; st.ty=Math.max(-1,Math.min(1,(e.clientY-r.top)/r.height*2.6-1)); st.ptr=true; },
+    leave(){ st.ptr=false; },
+    wake(){ if(!reduceMotion){ st.wake=0; st.k=1; } },
+    breathe(on){ st.breathTo=on?1:0; if(!on) st.breath=0; },
+    flare(v){ st.flare=Math.max(st.flare,v); }
+  };
+}
+
+/* flames along the bottom and embers drifting up in the dragon's colours, for the living lock screen and background.
+   Embers vary in size, speed, life and flicker, swirl in the air, cool as they rise, sometimes shoot up as sparks,
+   and the fire throws out a burst now and then. Motion is time-based, so a lower frame rate only looks less smooth. */
+function fireFx(canvas,where,opt){
+  let x=null, W=0, H=0, cw=0, ch=0, raf=0, on=false, last=0, flames=[], embers=[], spr=null, tongues=null, palKey='', palAt=0, bed=[160,40,10], nextBurst=0;
+  const R=Math.random, seed=R()*1000;
+  const glowS=([r,g,b])=>{ const s=document.createElement('canvas'); s.width=s.height=64; const q=s.getContext('2d'), gr=q.createRadialGradient(32,32,0,32,32,32);
+    gr.addColorStop(0,`rgba(${r},${g},${b},1)`); gr.addColorStop(.3,`rgba(${r},${g},${b},.5)`); gr.addColorStop(1,`rgba(${r},${g},${b},0)`); q.fillStyle=gr; q.fillRect(0,0,64,64); return s; };
+  const tongue=([r,g,b])=>{ const s=document.createElement('canvas'); s.width=64; s.height=160; const q=s.getContext('2d'); q.filter='blur(6px)';
+    const gr=q.createRadialGradient(32,118,2,32,100,60); gr.addColorStop(0,`rgba(${r},${g},${b},1)`); gr.addColorStop(.45,`rgba(${r},${g},${b},.45)`); gr.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    q.fillStyle=gr; q.beginPath(); q.moveTo(32,10); q.bezierCurveTo(46,60,58,92,52,124); q.bezierCurveTo(46,150,18,150,12,124); q.bezierCurveTo(6,92,18,60,32,10); q.fill(); return s; };
+  function palette(now){ if(spr&&now-palAt<150) return; palAt=now; const p=firePalette(where), k=p.hot.join()+p.mid.join()+p.deep.join(); if(k===palKey) return;
+    palKey=k; bed=p.deep; spr=[glowS(p.hot),glowS(p.mid),glowS(p.deep)]; tongues=[tongue(p.hot),tongue(p.mid),tongue(p.deep)]; }
+  const heat=(u,t)=>Math.max(0,.45+.3*Math.sin(u*9+t*.7+seed)+.25*Math.sin(u*23-t*1.3+seed*2)+.2*Math.sin(u*4+t*.31));
+  const sc=()=>Math.min(W,H)/700, tall=()=>H>W;
+  function flame(now){ let u=R(); for(let i=0;i<3&&R()>heat(u,now/1000);i++) u=R(); const h=heat(u,now/1000), s=sc()*opt.flame;
+    return {x:u*W,y:H+6,vx:(R()-.5)*.25,vy:-(.9+R()*1.3)*(0.6+h)*s*.7,t0:now,life:450+R()*550*(0.5+h),r:(7+R()*9)*(0.7+h*.6)*s,ph:R()*6.28}; }
+  /* mostly tiny embers, a few big ones, some fast sparks; a burst flies out wider and faster */
+  function ember(now,x0,y0,burst,age){ const s=sc(), big=R()<.1, spark=!big&&R()<.13, rise=tall()?opt.riseTall:opt.rise;
+    const e={x:x0??R()*W,y:y0??H*(.9+R()*.12),vx:(R()-.5)*(burst?3:.7)*s,vy:-(.35+R()*1.25)*s*rise*(burst?1.6:1)*(spark?2.2:1),t0:now,
+      life:(spark?700+R()*1300:2000+R()*7000)*(burst?.7:1),r:(big?2.8+R()*2.2:.9+R()*1.7)*s,ph:R()*100,fq:35+R()*110,sw:.2+R()*1.4,spark,sput:0};
+    if(age){ e.t0-=age*e.life; e.y=H*(.25+R()*.75); } return e; }
+  function fit(){ const d=Math.min(opt.maxDpr,devicePixelRatio||1); cw=canvas.clientWidth; ch=canvas.clientHeight; W=cw; H=ch;
+    canvas.width=Math.max(1,Math.round(cw*d)); canvas.height=Math.max(1,Math.round(ch*d)); x=canvas.getContext('2d'); x.setTransform(d,0,0,d,0,0);
+    const now=performance.now(); flames=[]; embers=Array.from({length:target(now)},()=>ember(now,null,null,false,R())); }
+  const target=now=>Math.round(W/(tall()?opt.perTall:opt.per)*(.75+.35*Math.sin(now/3700+seed)+.15*Math.sin(now/1300)));
+  function frame(now){
+    if(!on) return; raf=requestAnimationFrame(frame);
+    if(last&&now-last<1000/opt.fps-2) return; const f=last?Math.min(4,(now-last)/16):1; last=now;
+    if(canvas.clientWidth!==cw||canvas.clientHeight!==ch) fit();
+    palette(now); x.clearRect(0,0,W,H);
+    const g=x.createLinearGradient(0,H*.78,0,H), b=bed.join(','); g.addColorStop(0,`rgba(${b},0)`); g.addColorStop(1,`rgba(${b},${opt.bed})`); x.fillStyle=g; x.fillRect(0,H*.78,W,H*.22);
+    x.save(); x.globalCompositeOperation='lighter';
+    const want=Math.round(W/(tall()?3:6)*opt.flames);
+    while(flames.length<want) flames.push(flame(now));
+    for(let i=0;i<flames.length;i++){ const p=flames[i], k=(now-p.t0)/p.life; if(k>=1){ flames[i]=flame(now); continue; }
+      const age=(now-p.t0)/16, px=p.x+p.vx*age+Math.sin(p.ph+now/260)*3*k, py=p.y+p.vy*age, rr=p.r*(1-k*.75), a=Math.min(1,k*8)*(1-k)*opt.alpha;
+      const st=k*2, i0=Math.min(1,st|0), w=st-i0;
+      x.globalAlpha=a*(1-w)*.55; x.drawImage(tongues[i0],px-rr*.65,py-rr*2.6,rr*1.3,rr*3.2);
+      x.globalAlpha=a*w*.55; x.drawImage(tongues[i0+1],px-rr*.65,py-rr*2.6,rr*1.3,rr*3.2);
+      if(k>.6&&R()<.004*f) embers.push(ember(now,px,py-rr*2)); }
+    // the fire throws out a burst now and then
+    if(now>nextBurst){ if(nextBurst){ const bx=W*(.05+R()*.9), n=6+(R()*16|0); for(let i=0;i<n;i++) embers.push(ember(now,bx+(R()-.5)*30*sc(),H*.98,true)); } nextBurst=now+1800+R()*5200; }
+    const s=sc();
+    for(let i=embers.length-1;i>=0;i--){ const e=embers[i], k=(now-e.t0)/e.life;
+      if(k>=1||e.y<-20){ embers.splice(i,1); continue; }
+      // swirl: a slow drifting air current plus a little jitter; sparks stay straighter
+      e.vx+=(Math.sin(e.y*.011+now*.0006+e.ph)*.045*e.sw+(R()-.5)*.05)*s*f*(e.spark?.3:1); e.vx*=Math.pow(.985,f); e.vy*=Math.pow(.997,f);
+      e.x+=e.vx*f; e.y+=e.vy*f;
+      if(e.sput>0) e.sput-=f; else if(R()<.004*f) e.sput=4+R()*10;      // sputters for a moment
+      const fl=(.55+.45*Math.sin(now/e.fq+e.ph))*(e.sput>0?.25:1), a=Math.min(1,k*6)*Math.pow(1-k,.8)*fl*opt.alpha, sz=e.r*(1-k*.45)*7;
+      if(e.spark){ const len=Math.min(14,Math.hypot(e.vx,e.vy)*5); x.globalAlpha=a;
+        x.drawImage(spr[0],e.x-sz*.2,e.y-sz*.2,sz*.4,sz*.4); x.globalAlpha=a*.6; x.drawImage(spr[1],e.x-sz*.35,e.y-sz*.35+len*.3,sz*.7,sz*.7+len); continue; }
+      x.globalAlpha=a*(1-k*.5); x.drawImage(spr[k<.5?1:2],e.x-sz/2,e.y-sz/2,sz,sz);
+      x.globalAlpha=a*.75*(1-k); x.drawImage(spr[0],e.x-sz*.18,e.y-sz*.18,sz*.36,sz*.36); }
+    const t=target(now); if(embers.length<t&&R()<.6) embers.push(ember(now));
+    x.restore(); x.globalAlpha=1;
+  }
+  return {
+    start(){ if(on) return; if(opt.hide) canvas.hidden=false; on=true; last=0; fit(); palKey=''; palette(performance.now()); if(reduceMotion){ on=false; return; } raf=requestAnimationFrame(frame); },
+    stop(){ on=false; cancelAnimationFrame(raf); if(x) x.clearRect(0,0,W,H); if(opt.hide) canvas.hidden=true; }
+  };
+}
+
+  const bg=livingDragon($('#dbg'),{maxDpr:1,fps:30,dim:.45,blinkMin:3,blinkVar:6,wakeSecs:2.5});
+  const fire=fireFx($('#dfire'),'bg',{fps:30,maxDpr:1.5,flame:.8,flames:.6,rise:1,riseTall:1.5,per:12,perTall:5,bed:.2,alpha:.75,hide:true});
+  const cd=livingDragon($('#dcount'),{maxDpr:1.5,fps:60,dim:0,blinkMin:3,blinkVar:6,wakeSecs:2.2});
+  const LOOKS={suffler:'lookSuffler',lava:'lookLava',frost:'lookFrost',bronze:'lookBronze'};
+  const COLS={own:'cOwn',cycle:'cCycle',fire:'cFire',crimson:'cCrimson',gold:'cGold',jade:'cJade',frost:'cFrost',violet:'cViolet',steel:'cSteel'};
+  const rgb=a=>`rgb(${a.join(',')})`; let scr='home', tick=0;
+  const dragonOn=()=>!!LIVE_PICS[S2.look];
+  function paint(){ const p=firePalette('bg'), r=document.documentElement.style; r.setProperty('--acc',rgb(p.mid)); r.setProperty('--hot',rgb(p.hot)); }
+  function apply(){
+    const on=dragonOn(); document.documentElement.dataset.look=on?'dragon':'suffler';
+    if(on){ S.dragon.pic=S2.look; S.dragon.colour=S2.dcol||'own'; paint(); clearInterval(tick); tick=setInterval(paint,150); }
+    else { clearInterval(tick); document.documentElement.style.removeProperty('--acc'); document.documentElement.style.removeProperty('--hot'); }
+    const behind=on&&scr!=='shoot';
+    if(behind&&bg.start(S2.look,'bg')) fire.start(); else { bg.stop(); fire.stop(); }
+  }
+  function renderPanel(){
+    $('#lookOpts').innerHTML=Object.entries(LOOKS).map(([k,n])=>`<button data-lk="${k}" aria-pressed="${(S2.look||'suffler')===k}">${esc(t(n))}</button>`).join('');
+    $('#lookCols').classList.add('cols');
+    $('#lookCols').innerHTML=Object.entries(COLS).map(([k,n])=>{ const c=LIVE_COLS[k]; return `<button data-dcol="${k}" aria-pressed="${(S2.dcol||'own')===k}"><i style="background:${c&&c.mid?rgb(c.mid):k==='cycle'?'conic-gradient(#ff7020,#e8282a,#a050ff,#50b4ff,#32dc6e,#f0b038,#ff7020)':'linear-gradient(90deg,#ff7020,#50b4ff)'}"></i>${esc(t(n))}</button>`; }).join('');
+    const on=dragonOn(); $('#lookCols').hidden=!on; $('#lookColHead').hidden=!on; $('#lookHint').hidden=!on;
+  }
+  $('#lookBtn').onclick=()=>{ renderPanel(); $('#looks').hidden=false; };
+  $('#looksDone').onclick=()=>{ $('#looks').hidden=true; };
+  $('#looks').addEventListener('click',e=>{ const b=e.target.closest('[data-lk],[data-dcol]'); if(!b) return;
+    if(b.dataset.lk) S2.look=b.dataset.lk; else S2.dcol=b.dataset.dcol; save(); apply(); renderPanel(); });
+  apply();
+  return {
+    screen(id){ scr=id; if(id==='shoot') $('#looks').hidden=true; apply(); },
+    countStart(){ if(!dragonOn()) return false; const c=$('#dcount'); c.classList.remove('fade'); if(!cd.start(S2.look,'lock')) return false; cd.wake(); return true; },
+    breathe(){ cd.breathe(true); },
+    countEnd(){ const c=$('#dcount'); c.classList.add('fade'); setTimeout(()=>{ cd.breathe(false); cd.stop(); c.classList.remove('fade'); },1400); }
+  };
+})(S);
 </script>
 </body></html>
