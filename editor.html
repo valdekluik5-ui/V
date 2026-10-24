@@ -143,7 +143,7 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
 <script>
 /* ---------- words ---------- */
 const T={
- en:{title:'Editor',save:'Save',when:'When',startHere:'Start here',endHere:'End here',wholeVid:'Whole video',tCut:'Cutout',cutHint:'Finds her in the video, so things can go behind her.',cutLoading:'Loading the cutout… (the first time it downloads about 10 MB)',cutFail:'The cutout could not start on this phone: ',background:'Background',bgNone:'Original',bgBlur:'Blur',bgDark:'Dark',bgColour:'Colour',bgPhoto:'📷 Photo',outline:'Outline',olNone:'None',olWhite:'White',olNeon:'Neon',olChalk:'Chalk',olFire:'Fire',behindTxt:'Big text behind her',behindPh:'e.g. HAPPY',tStyle:'Styles',tCaps:'Captions',
+ en:{title:'Editor',save:'Save',mixing:'Mixing the sound…',when:'When',startHere:'Start here',endHere:'End here',wholeVid:'Whole video',tCut:'Cutout',cutHint:'Finds her in the video, so things can go behind her.',cutLoading:'Loading the cutout… (the first time it downloads about 10 MB)',cutFail:'The cutout could not start on this phone: ',background:'Background',bgNone:'Original',bgBlur:'Blur',bgDark:'Dark',bgColour:'Colour',bgPhoto:'📷 Photo',outline:'Outline',olNone:'None',olWhite:'White',olNeon:'Neon',olChalk:'Chalk',olFire:'Fire',behindTxt:'Big text behind her',behindPh:'e.g. HAPPY',tStyle:'Styles',tCaps:'Captions',
   stHint:'Moving captions in one tap. Add the words under Captions; they follow her voice.',stNone:'Off',capSize:'Size',capY:'Height',needWords:'No words yet: go to Captions.',
   capsHint:'Where do the words come from?',hear:'✨ Hear my words',hearNo:'Hear my words needs a free Gemini key, the same one the Oracle in Suffler uses. Paste it here:',fromScript:'Use a Suffler script',typePh:'Or type / paste what she says…',match:'Match to voice',
   listening:'Listening…',matching:'Matching words to the voice…',matched:'Done: {n} words. Play it. A word too early or late? Tap it, move the playhead to where it is said and tap Starts here.',noVoice:'Could not hear speech in this video.',hearFail:'Hearing failed: ',
@@ -159,7 +159,7 @@ const T={
   musicHint:'Pick a song or sound from your phone.',pickMusic:'Choose music',musicVol:'Music',duck:'Lower music under the voice',removeMusic:'Remove music',
   formatHint:'The shape of the finished video.',fit:'Fill the frame (crop) · zoom each clip under Filters',
   saveT:'Save video',saveHint:'The video plays through once while it is saved, so it takes as long as the video. On iPhone it goes to Files › Downloads; from there Share › Save Video puts it in Photos.',saveGo:'Save',close:'Close',saving:'Saving… ',saved:'Saved. Look in your downloads.',saveFail:'This browser could not save the video.',leave:'Leave the editor? Your edit is not kept.'},
- uk:{title:'Редактор',save:'Зберегти',when:'Коли',startHere:'Почати тут',endHere:'Закінчити тут',wholeVid:'Усе відео',tCut:'Вирізати',cutHint:'Знаходить її у відео, щоб щось могло бути позаду неї.',cutLoading:'Завантажую вирізання… (першого разу це приблизно 10 МБ)',cutFail:'Вирізання не запустилось на цьому телефоні: ',background:'Фон',bgNone:'Оригінал',bgBlur:'Розмиття',bgDark:'Темний',bgColour:'Колір',bgPhoto:'📷 Фото',outline:'Контур',olNone:'Без',olWhite:'Білий',olNeon:'Неон',olChalk:'Крейда',olFire:'Вогонь',behindTxt:'Великий текст позаду неї',behindPh:'напр. ЩАСТЯ',tStyle:'Стилі',tCaps:'Субтитри',
+ uk:{title:'Редактор',save:'Зберегти',mixing:'Зводжу звук…',when:'Коли',startHere:'Почати тут',endHere:'Закінчити тут',wholeVid:'Усе відео',tCut:'Вирізати',cutHint:'Знаходить її у відео, щоб щось могло бути позаду неї.',cutLoading:'Завантажую вирізання… (першого разу це приблизно 10 МБ)',cutFail:'Вирізання не запустилось на цьому телефоні: ',background:'Фон',bgNone:'Оригінал',bgBlur:'Розмиття',bgDark:'Темний',bgColour:'Колір',bgPhoto:'📷 Фото',outline:'Контур',olNone:'Без',olWhite:'Білий',olNeon:'Неон',olChalk:'Крейда',olFire:'Вогонь',behindTxt:'Великий текст позаду неї',behindPh:'напр. ЩАСТЯ',tStyle:'Стилі',tCaps:'Субтитри',
   stHint:'Живі субтитри в один дотик. Додай слова у «Субтитри» — вони йдуть за голосом.',stNone:'Без',capSize:'Розмір',capY:'Висота',needWords:'Слів ще немає: відкрий «Субтитри».',
   capsHint:'Звідки взяти слова?',hear:'✨ Почути мої слова',hearNo:'Для цього потрібен безкоштовний ключ Gemini, той самий, що в Оракула в Suffler. Встав його сюди:',fromScript:'Взяти сценарій Suffler',typePh:'Або напиши / встав, що вона каже…',match:'Підігнати під голос',
   listening:'Слухаю…',matching:'Підганяю слова під голос…',matched:'Готово: {n} слів. Програй. Слово зарано чи запізно? Торкнись його, постав позначку туди, де воно звучить, і натисни «Звідси».',noVoice:'Не чути мови в цьому відео.',hearFail:'Не вдалося почути: ',
@@ -334,7 +334,7 @@ function pause(){ playing=false; $('#playBtn').textContent='▶'; for(const m of
 $('#playBtn').onclick=()=>playing?pause():play();
 function frame(now){
   requestAnimationFrame(frame); layout();
-  if(playing){ Tcur=Math.min(total,T0+(now-now0)/1000); if(Tcur>=total){ pause(); Tcur=total; if(exporting) exporting.finish(); } }
+  if(playing){ Tcur=Math.min(total,exporting&&exporting.clock?Math.max(0,exporting.clock()):T0+(now-now0)/1000); if(Tcur>=total){ pause(); Tcur=total; if(exporting) exporting.finish(); } }
   const i=clipAt(Tcur);
   $('#empty').hidden=P.clips.length>0; $('#exportBtn').disabled=!P.clips.length;
   if(i>=0&&gl){
@@ -497,27 +497,55 @@ $('#exportBtn').onclick=()=>{ pause(); $('#exportModal').hidden=false; $('#prog'
 $('#exportClose').onclick=()=>{ if(exporting) exporting.cancel(); $('#exportModal').hidden=true; };
 $('#resBtns').addEventListener('click',e=>{ const b=e.target.closest('[data-res]'); if(!b) return; res=+b.dataset.res; $('#resBtns').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); });
 function pickMime(){ if(!window.MediaRecorder) return null; for(const m of ['video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']) if(MediaRecorder.isTypeSupported(m)) return m; return ''; }
+/* the whole soundtrack is mixed ahead of time, then played from memory while recording:
+   capturing the videos' live sound crackles on iPhone whenever the phone is busy drawing */
+async function decodeFile(src){ const ab=await (await fetch(src)).arrayBuffer();
+  return await new Promise((ok,bad)=>{ const p=AC.decodeAudioData(ab,ok,bad); if(p&&p.then) p.then(ok,bad); }); }
+/* change speed without changing the voice's pitch (overlap-add, each piece nudged to line up with the last) */
+function stretch(buf,from,len,speed,R){ const src=buf.numberOfChannels>1?buf.getChannelData(0).map((v,i)=>(v+buf.getChannelData(1)[i])/2):buf.getChannelData(0), sr=buf.sampleRate;
+  const N=Math.round(sr*.046), Hs=N>>2, Ha=Hs*speed, tol=Math.round(N/8), outLen=Math.ceil(len*sr), out=new Float32Array(outLen+N), win=new Float32Array(N), norm=new Float32Array(outLen+N);
+  for(let i=0;i<N;i++) win[i]=.5-.5*Math.cos(2*Math.PI*i/N);
+  let prev=-1;
+  for(let k=0,o=0;o<outLen;k++,o+=Hs){ let a=Math.round(from*sr+k*Ha);
+    if(prev>=0){ let best=0, bv=-1e9; const want=prev+Hs;   // natural continuation of the last piece
+      for(let d=-tol;d<=tol;d+=2){ let c=0; const b=a+d; if(b<0||b+N>src.length) continue; for(let i=0;i<N;i+=4) c+=src[b+i]*src[want+i]||0; if(c>bv){ bv=c; best=d; } } a+=best; }
+    if(a<0||a+N>src.length) break; prev=a;
+    for(let i=0;i<N;i++){ out[o+i]+=src[a+i]*win[i]; norm[o+i]+=win[i]; } }
+  for(let i=0;i<outLen;i++) if(norm[i]>1e-3) out[i]/=norm[i];
+  const b=new AudioBuffer({length:outLen,numberOfChannels:1,sampleRate:sr}); b.copyToChannel(out.subarray(0,outLen),0); return b; }
+async function mixSound(){ const R=48000, off=new OfflineAudioContext(2,Math.max(1,Math.ceil(total*R)),R), ramp=.008;
+  const put=(buf,at,from,len,rate,vol)=>{ if(vol<=0||len<=0) return; const s=off.createBufferSource(), g=off.createGain(); s.buffer=buf; s.playbackRate.value=rate;
+    g.gain.setValueAtTime(0,at); g.gain.linearRampToValueAtTime(vol,at+ramp); g.gain.setValueAtTime(vol,Math.max(at+ramp,at+len-ramp)); g.gain.linearRampToValueAtTime(0,at+len);
+    s.connect(g); g.connect(off.destination); s.start(at,from); s.stop(at+len); };
+  for(const c of P.clips){ const m=mediaFor(c); try{ if(!m.buf) m.buf=await decodeFile(m.el.src); }catch(e){ m.buf=null; } if(m.buf){ if(Math.abs(c.speed-1)<.01) put(m.buf,c.t0,c.inS,c.len,1,c.vol); else put(stretch(m.buf,c.inS,c.len,c.speed),c.t0,0,c.len,1,c.vol); } }
+  if(P.music){ const mu=P.music; try{ if(!mu.buf) mu.buf=await decodeFile(mu.el.src); }catch(e){ mu.buf=null; }
+    if(mu.buf) put(mu.buf,mu.at,0,Math.min(mu.buf.duration,total-mu.at),1,mu.vol*(mu.duck&&P.clips.some(c=>c.vol>0)?.35:1)); }
+  return await off.startRendering(); }
 $('#exportGo').onclick=async()=>{
   const mime=pickMime(), out=document.createElement('canvas');
   if(mime===null||!out.captureStream){ $('#exportHint').textContent=t('saveFail'); return; }
-  ensureAC(); sizeCanvases(res); out.width=gl.canvas.width; out.height=gl.canvas.height; const cx=out.getContext('2d');
-  const dest=AC.createMediaStreamDestination(); master.connect(dest);
+  ensureAC(); $('#exportGo').disabled=true; $('#exportHint').textContent=t('mixing');
+  let mix; try{ mix=await mixSound(); }catch(e){ console.error(e); $('#exportHint').textContent=t('saveFail'); $('#exportGo').disabled=false; return; }
+  sizeCanvases(res); out.width=gl.canvas.width; out.height=gl.canvas.height; const cx=out.getContext('2d');
+  const dest=AC.createMediaStreamDestination(), bs=AC.createBufferSource(); bs.buffer=mix; bs.connect(dest); bs.connect(AC.destination);
   const stream=new MediaStream([...out.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]);
-  let rec; try{ rec=new MediaRecorder(stream,Object.assign({videoBitsPerSecond:res>=1080?10000000:6000000,audioBitsPerSecond:160000},mime?{mimeType:mime}:{})); }catch(err){ $('#exportHint').textContent=t('saveFail'); return; }
+  let rec; try{ rec=new MediaRecorder(stream,Object.assign({videoBitsPerSecond:res>=1080?10000000:6000000,audioBitsPerSecond:160000},mime?{mimeType:mime}:{})); }catch(err){ $('#exportHint').textContent=t('saveFail'); $('#exportGo').disabled=false; return; }
   const parts=[]; rec.ondataavailable=ev=>{ if(ev.data.size) parts.push(ev.data); };
-  $('#exportGo').disabled=true; $('#prog').hidden=false; const bar=$('#prog i');
-  const sel0=sel; sel=null;
-  const done=ok=>{ exporting=null; sel=sel0; try{ master.disconnect(dest); }catch(e){} sizeCanvases(); if(!ok){ $('#exportGo').disabled=false; return; }
+  $('#prog').hidden=false; const bar=$('#prog i');
+  const sel0=sel; sel=null; master.gain.value=0;   // the videos still play for their pictures, silently
+  const done=ok=>{ exporting=null; sel=sel0; master.gain.value=1; try{ bs.stop(); }catch(e){} try{ bs.disconnect(); }catch(e){} sizeCanvases(); if(!ok){ $('#exportGo').disabled=false; return; }
     const blob=new Blob(parts,{type:rec.mimeType||mime||'video/mp4'}), ext=(blob.type||'').includes('mp4')?'mp4':'webm', u=URL.createObjectURL(blob), a=document.createElement('a');
     a.href=u; a.download='suffler-'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.'+ext; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),60000);
     $('#exportHint').textContent=t('saved'); $('#exportGo').disabled=false; };
+  let t0=0;
   exporting={
+    clock(){ return AC.currentTime-t0; },   // the picture follows the sound's clock so they stay together
     draw(){ cx.drawImage(gl.canvas,0,0); cx.drawImage(ov,0,0); bar.style.width=Math.round(Tcur/Math.max(.01,total)*100)+'%'; $('#exportHint').textContent=t('saving')+Math.round(Tcur/Math.max(.01,total)*100)+'%'; },
     finish(){ setTimeout(()=>{ try{ rec.stop(); }catch(e){} },150); },
     cancel(){ pause(); rec.onstop=null; try{ rec.stop(); }catch(e){} done(false); }
   };
   rec.onstop=()=>done(true);
-  Tcur=0; curIdx=-1; await new Promise(r=>setTimeout(r,300)); rec.start(500); play();
+  Tcur=0; curIdx=-1; await new Promise(r=>setTimeout(r,300)); rec.start(500); t0=AC.currentTime+.15; bs.start(t0); play();
 };
 
 addEventListener('beforeunload',e=>{ if(P.clips.length){ e.preventDefault(); e.returnValue=t('leave'); } });
