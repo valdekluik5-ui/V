@@ -83,6 +83,8 @@ input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line
 .modal h2{margin:0;font-family:var(--serif);font-size:24px}
 .prog{height:8px;border-radius:4px;background:var(--panel2);overflow:hidden}.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
 .file{position:relative;overflow:hidden}
+.btns button.pill{background:var(--acc);color:var(--ink);border-color:var(--acc)}
+.btns button.pill:disabled{opacity:.4}
 .file input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .tpls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .tpl{aspect-ratio:5/4;border:2px solid transparent;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:6px;overflow:hidden}
@@ -873,6 +875,16 @@ $('#panel').addEventListener('click',e=>{ if(tab!=='cut') return; const b=e.targ
 $('#panel').addEventListener('input',e=>{ if(e.target.id==='behindTxt'){ P.cut.behind=e.target.value; if(cutActive()) segLoad(); } });
 $('#panel').addEventListener('change',e=>{ if(e.target.id==='bgPhoto'&&e.target.files[0]){ P.cut.photo=URL.createObjectURL(e.target.files[0]); P.cut.bg='photo'; segLoad(); renderPanel(); } });
 
+/* a take sent from Suffler: open it, and time the words she read to her voice */
+if(/[?&]take=1/.test(location.search)) (async()=>{ history.replaceState(null,'',location.pathname);
+  try{ const db=await new Promise((ok,bad)=>{ const r=indexedDB.open('sf',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); });
+    const h=await new Promise((ok,bad)=>{ const q=db.transaction('kv').objectStore('kv').get('handoff'); q.onsuccess=()=>ok(q.result); q.onerror=()=>bad(q.error); });
+    if(!h||!h.blob) return; db.transaction('kv','readwrite').objectStore('kv').delete('handoff');
+    const ext=/mp4/.test(h.type)?'mp4':'webm'; await addFiles([new File([h.blob],'take.'+ext,{type:h.type})]);
+    const c=P.clips[P.clips.length-1]; sel={kind:'clip',id:c.id}; tab='caps'; refresh();
+    if(h.text&&h.text.trim()) capRun(c,m=>matchText(m,h.text),t('matching'));
+  }catch(e){ console.error(e); }
+})();
 sizeCanvases(); refresh();
 </script>
 </body></html>
