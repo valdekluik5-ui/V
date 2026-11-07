@@ -230,7 +230,7 @@ textarea#text::placeholder{color:var(--mist);font-style:italic}
       <circle class="tw" cx="190" cy="196" r="1.1" fill="#ffd9e8"/><circle class="tw d2" cx="28" cy="210" r="1" fill="#f0c97a"/><circle class="tw d3" cx="368" cy="30" r="1.2" fill="#ffd9e8"/>
     </svg>
     <div class="hello">
-      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v25</span><a class="chip" id="edBtn" href="editor.html" style="color:inherit;text-decoration:none">🎬 <span data-t="editor"></span></a><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
+      <div class="top"><span class="sc">SUFFLER</span><span class="ver">v26</span><a class="chip" id="edBtn" href="editor.html" style="color:inherit;text-decoration:none">🎬 <span data-t="editor"></span></a><button class="chip" id="lookBtn">✦ <span data-t="look"></span></button><button class="chip" id="lang">EN</button></div>
       <h1 id="greet"></h1>
       <div class="season" id="season"></div>
       <p data-t="ask"></p>
@@ -375,11 +375,11 @@ const save=()=>store.set('sf.settings',S);
 /* ---------- words ---------- */
 const T={
  en:{title:'Text',ph:'Paste the text she will read here…',start:'Open camera',words:'words',min:'about',back:'Back',settings:'Settings',flip:'Switch camera',rec:'Record',size:'Text size',speed:'Scroll speed',height:'Text area',ok:'Done',voice:'🎙 Voice',auto:'↓ Auto',
-  nocam:'No camera here. Open this file in Chrome on your computer to use the camera.',noMic:'Mic not available · text scrolls automatically',micErr:'Voice recognition not allowed · switched to auto scroll',reconnect:'Voice reconnecting · scrolling at your pace',vtest:'Test voice',autovol:'Auto volume',boost:'Volume boost',eVol:'Volume',eNoise:'Remove hiss',eClear:'Voice clarity',eStart:'Cut start',eEnd:'Cut end',rendering:'Saving with your changes…',renderFail:'Could not apply changes here, saved the original.',vtestListen:'Speak now… (10 s)',vtestNone:'Heard nothing.',vtestNo:'This browser has no voice recognition.',listening:'Listening…',paused:'Paused · tap the text to continue',
+  nocam:'No camera here. Open this file in Chrome on your computer to use the camera.',noMic:'Mic not available · text scrolls automatically',noHear:'Voice not heard yet · scrolling at your pace',micErr:'Voice recognition not allowed · switched to auto scroll',reconnect:'Voice reconnecting · scrolling at your pace',vtest:'Test voice',autovol:'Auto volume',boost:'Volume boost',eVol:'Volume',eNoise:'Remove hiss',eClear:'Voice clarity',eStart:'Cut start',eEnd:'Cut end',rendering:'Saving with your changes…',renderFail:'Could not apply changes here, saved the original.',vtestListen:'Speak now… (10 s)',vtestNone:'Heard nothing.',vtestNo:'This browser has no voice recognition.',listening:'Listening…',paused:'Paused · tap the text to continue',
   save:'Save video',again:'Record again',openEd:'Open in the editor',edFail:'Could not open the editor here: ',savedHint:'Saved to your Downloads folder.',noVideo:'No camera, so nothing was recorded. This was a practice run.',
   sample:'Hi! Today I want to show you three simple habits that changed my mornings.\n\nThe first one is a glass of water right after waking up. It sounds obvious, but it wakes me up faster than coffee.\n\nThe second is five minutes without my phone. I sit by the window and think about what matters today.\n\nAnd the third is writing down one thing I will do before lunch. Just one.\n\nTell me in the comments which habit you like most, and subscribe for the next video!'},
  uk:{title:'Текст',ph:'Встав сюди текст, який будеш читати…',start:'Відкрити камеру',words:'слів',min:'приблизно',back:'Назад',settings:'Налаштування',flip:'Змінити камеру',rec:'Запис',size:'Розмір тексту',speed:'Швидкість прокрутки',height:'Висота тексту',ok:'Готово',voice:'🎙 Голос',auto:'↓ Авто',
-  nocam:'Камера тут недоступна. Відкрий цей файл у Chrome на комп’ютері.',noMic:'Мікрофон недоступний · текст прокручується сам',micErr:'Розпізнавання голосу заборонено · увімкнено автопрокрутку',reconnect:'Голос перепідключається · прокручую у твоєму темпі',vtest:'Перевірити голос',autovol:'Автогучність',boost:'Підсилення гучності',eVol:'Гучність',eNoise:'Прибрати шум',eClear:'Чіткість голосу',eStart:'Обрізати початок',eEnd:'Обрізати кінець',rendering:'Зберігаю зі змінами…',renderFail:'Не вдалося застосувати зміни, збережено оригінал.',vtestListen:'Говори… (10 с)',vtestNone:'Нічого не почуто.',vtestNo:'Цей браузер не розпізнає голос.',listening:'Слухаю…',paused:'Пауза · торкнись тексту, щоб продовжити',
+  nocam:'Камера тут недоступна. Відкрий цей файл у Chrome на комп’ютері.',noMic:'Мікрофон недоступний · текст прокручується сам',noHear:'Голос поки не чути · прокручую у твоєму темпі',micErr:'Розпізнавання голосу заборонено · увімкнено автопрокрутку',reconnect:'Голос перепідключається · прокручую у твоєму темпі',vtest:'Перевірити голос',autovol:'Автогучність',boost:'Підсилення гучності',eVol:'Гучність',eNoise:'Прибрати шум',eClear:'Чіткість голосу',eStart:'Обрізати початок',eEnd:'Обрізати кінець',rendering:'Зберігаю зі змінами…',renderFail:'Не вдалося застосувати зміни, збережено оригінал.',vtestListen:'Говори… (10 с)',vtestNone:'Нічого не почуто.',vtestNo:'Цей браузер не розпізнає голос.',listening:'Слухаю…',paused:'Пауза · торкнись тексту, щоб продовжити',
   save:'Зберегти відео',again:'Записати ще раз',openEd:'Відкрити в редакторі',edFail:'Не вдалося відкрити редактор: ',savedHint:'Збережено в папку «Завантаження».',noVideo:'Камери немає, тому нічого не записано. Це була репетиція.',
   sample:'Привіт! Сьогодні я покажу вам три прості звички, які змінили мій ранок.\n\nПерша — склянка води одразу після пробудження. Звучить банально, але вона будить мене швидше за каву.\n\nДруга — п’ять хвилин без телефону. Я сиджу біля вікна і думаю, що для мене важливо сьогодні.\n\nА третя — записати одну річ, яку я зроблю до обіду. Тільки одну.\n\nНапишіть у коментарях, яка звичка вам подобається найбільше, і підписуйтесь!'}
 };
@@ -687,16 +687,21 @@ function setTimer(){const s=Math.round(elapsed);$('#timer span').textContent=Str
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let lastErr='',voiceOn=false,voiceErrs=[],gotResult=false,fallback=false,restartT=null,greeted=false;
+/* listen in the script's language, not the app's: a Ukrainian script is heard as Ukrainian even when the app is in English */
+function scriptLang(){let cy=0,la=0;for(const w of W){for(const ch of w.raw){if(/[\u0400-\u04FF]/.test(ch))cy++;else if(/[a-z]/i.test(ch))la++}}return cy>la?'uk-UA':cy||la?'en-US':(S.ui==='uk'?'uk-UA':'en-US')}
+let hearT=null;
 function startVoice(){
   if(!SR){toAuto();return}
-  voiceOn=true;gotResult=false;voiceErrs=[];fallback=false;greeted=false;listen();
+  voiceOn=true;gotResult=false;voiceErrs=[];fallback=false;greeted=false;lastErr='';listen();
+  /* if nothing is heard at all, keep the text moving at her pace and say so; voice takes over again as soon as words arrive */
+  clearTimeout(hearT);hearT=setTimeout(()=>{if(voiceOn&&running&&!gotResult&&!fallback){fallback=true;useAuto=true;fpos=shown;status(t('noHear')+(lastErr?' ('+lastErr+')':''))}},7000);
 }
 /* one listening session; when it ends or fails, a fresh one starts, so voice never switches itself off */
 function listen(){
   clearTimeout(restartT);
   if(!voiceOn||!running)return;
   let r;try{r=new SR()}catch(e){toAuto();return}
-  r.lang=S.ui==='uk'?'uk-UA':'en-US';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
+  r.lang=scriptLang();r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
   let base={},born={},cutting=false;
   r.onresult=e=>{
     if(recog!==r)return;
@@ -729,7 +734,7 @@ function listen(){
 function syncVoice(){V.pos=Math.max(V.pos,shown);interimPos=0}
 function toAuto(msg){useAuto=true;fpos=shown;const m=msg||t('noMic');status(m);setTimeout(()=>{if($('#status').textContent===m)status('')},5000)}
 function heardLine(txt){const h=$('#heard');const ws=txt.trim().split(/\s+/);h.textContent='🎙 '+ws.slice(-7).join(' ');h.hidden=false;clearTimeout(heardLine.t);heardLine.t=setTimeout(()=>h.hidden=true,2500)}
-function stopVoice(){voiceOn=false;fallback=false;clearTimeout(restartT);$('#heard').hidden=true;if(recog){const r=recog;recog=null;try{r.stop()}catch(e){}}}
+function stopVoice(){clearTimeout(hearT);voiceOn=false;fallback=false;clearTimeout(restartT);$('#heard').hidden=true;if(recog){const r=recog;recog=null;try{r.stop()}catch(e){}}}
 
 /* sound: even out her volume and keep it clear. iPhone's mic level drops once voice recognition starts, so the app levels it itself */
 let AC=null,proc=null;
@@ -1144,7 +1149,7 @@ $('#vtest').onclick=()=>{
   const out=$('#vtestOut');out.hidden=false;
   if(!SR){out.textContent=t('vtestNo');return}
   if(running)return;
-  const r=new SR();r.lang=S.ui==='uk'?'uk-UA':'en-US';r.continuous=true;r.interimResults=true;
+  const r=new SR();r.lang=scriptLang();r.continuous=true;r.interimResults=true;
   let got='',err='';out.textContent=t('vtestListen')+' · '+r.lang+(stream?' · camera mic on':'');
   r.onresult=e=>{got=[...e.results].map(x=>x[0].transcript).join(' ');out.textContent='🎙 '+got};
   r.onerror=e=>{err=e.error;out.textContent=(got?'🎙 '+got+' · ':'')+'error: '+e.error};
