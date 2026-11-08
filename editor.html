@@ -1026,13 +1026,31 @@ function cleanVoice(x,rate,strength,onProgress){
   return y;
 }
 const CLEAN_LVL={light:[2.2,.08],strong:[3,.03],max:[4,.02]};
+/* Voice Clean 1.1 (the Voice Clean app's method: neural voice filter, then the noise-profile cleaner, then the level)
+   runs in a background worker (voiceclean.js + rnnoise.wasm); where it cannot run, the older cleaner above is used */
+const VC_STRENGTH={light:.35,strong:.6,max:.9};
+let vcWorker=null,vcSeq=0;
+function vcClean(x,lvl,onProgress){
+  return new Promise(res=>{
+    const fallback=()=>res(cleanVoice(x,48000,CLEAN_LVL[lvl]));
+    try{if(!vcWorker)vcWorker=new Worker('voiceclean.js')}catch(e){return fallback()}
+    const id=++vcSeq,w=vcWorker;
+    const done=()=>{w.removeEventListener('message',on);w.removeEventListener('error',err)};
+    const on=ev=>{const d=ev.data;if(!d||d.id!==id)return;
+      if(d.progress){if(onProgress)onProgress(d.progress==='neural'?d.p*.4:.4+d.p*.6);return}
+      done();if(d.error||!d.y)fallback();else res(d.y)};
+    const err=()=>{done();vcWorker=null;try{w.terminate()}catch(e){}fallback()};
+    w.addEventListener('message',on);w.addEventListener('error',err);
+    w.postMessage({id,x:x.slice(),strength:VC_STRENGTH[lvl]||.6,wasm:new URL('rnnoise.wasm',location.href).href});
+  });
+}
 let cleanBusy='';
 /* the video's sound as one 48 kHz channel, cleaned once per strength */
 async function cleanFor(m){ ensureAC(); m.clean=m.clean||{}; if(m.clean[P.voice.lvl]) return m.clean[P.voice.lvl];
   const lvl=P.voice.lvl, dec=m.buf||(m.buf=await decodeFile(m.el.src));
   const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(dec.duration*48000)),48000), s=off.createBufferSource(); s.buffer=dec; s.connect(off.destination); s.start();
   const x=(await off.startRendering()).getChannelData(0); await new Promise(r=>setTimeout(r,30));
-  const y=cleanVoice(x,48000,CLEAN_LVL[lvl]), b=AC.createBuffer(1,y.length,48000); b.copyToChannel(y,0); return m.clean[lvl]=b; }
+  const y=await vcClean(x,lvl), b=AC.createBuffer(1,y.length,48000); b.copyToChannel(y,0); return m.clean[lvl]=b; }
 /* in the preview the cleaned voice plays in step with the video; returns true while it is standing in for the video's sound */
 const VP={src:null,g:null,clip:null,lvl:'',at:0,from:0,rate:1};
 function vpStop(){ if(VP.src){ try{ VP.src.stop(); }catch(e){} try{ VP.src.disconnect(); }catch(e){} } VP.src=null; VP.clip=null; }
